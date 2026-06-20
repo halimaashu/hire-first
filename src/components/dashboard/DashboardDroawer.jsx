@@ -5,6 +5,7 @@ import {
   Gear,
   House,
   Magnifier,
+  FolderPlus,
   Person,
 } from "@gravity-ui/icons";
 
@@ -15,7 +16,7 @@ export function DashboardDrawer() {
   const navItems = [
     { icon: House, href: "/dashboard/recruiter", label: "Home" },
     { icon: Magnifier, href: "/dashboard/recruiter/jobs", label: "Jobs" },
-    { icon: Magnifier, href: "/dashboard/recruiter/jobs/new", label: "Post Job" },
+    { icon: FolderPlus, href: "/dashboard/recruiter/jobs/new", label: "Post Job" },
     { icon: Person, href: "/dashboard/recruiter/company", label: "Company Profile" },
     { icon: Bell, href: "/dashboard/recruiter/notifications", label: "Notifications" },
     { icon: Envelope, href: "/dashboard/recruiter/messages", label: "Messages" },

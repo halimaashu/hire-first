@@ -14,7 +14,7 @@ export default function NavBar() {
   const [open, setOpen] = useState(false);
   const { data: session } = authClient.useSession();
   const user = session?.user;
-  console.log(user, "from navbar");
+
   const links = [
     { label: "Home", href: "/" },
     { label: "Browse Jobs", href: "/jobs" },
