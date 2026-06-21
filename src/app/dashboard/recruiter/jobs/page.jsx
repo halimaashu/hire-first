@@ -1,10 +1,14 @@
 import JobActions from "@/components/job/JobAction";
+import { getLoggedInRecruiterCompany } from "@/lib/api/companyes";
 import { getJobs } from "@/lib/api/job";
+import { Button } from "@heroui/react";
 
 
 const AllJobPage = async () => {
+  const company=await getLoggedInRecruiterCompany()
+  // console.log(company._id)
   const jobs = await getJobs({
-    companyId: "company_123",
+    companyId:company._id,
     status: "active",
   });
 
@@ -20,13 +24,16 @@ const AllJobPage = async () => {
     <div className="bg-[#121214] border border-neutral-800/80 rounded-2xl overflow-hidden">
       <table className="w-full">
         <thead className="bg-[#0f0f11] border-b border-neutral-800">
-          <tr>
+          <tr className="">
             <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-widest text-neutral-500">
               Job Title
             </th>
 
             <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-widest text-neutral-500">
               Position
+            </th>
+            <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-widest text-neutral-500">
+              Status
             </th>
 
             <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-widest text-neutral-500">
@@ -51,6 +58,11 @@ const AllJobPage = async () => {
                 <p className="text-sm text-neutral-300 capitalize">
                   {job.jobCategory}
                 </p>
+              </td>
+              <td className="px-5 py-4">
+                <Button variant="secondary" className="bg-none text-sm capitalize text-green-500">
+                  {job.status}
+                </Button>
               </td>
 
               <td className="px-5 py-4">

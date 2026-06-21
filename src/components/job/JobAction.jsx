@@ -41,7 +41,7 @@ export default function JobActions({ job }) {
       <button
         onClick={handleDelete}
         aria-label="Delete job"
-        className="w-8 h-8 flex items-center justify-center rounded-lg text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10"
+        className="w-8 h-8 flex items-center justify-center rounded-lg text-red-500 hover:text-rose-400 hover:bg-rose-500/10"
       >
         <TrashBin className="w-4 h-4" />
       </button>

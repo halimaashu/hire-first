@@ -47,15 +47,17 @@ export default function CompanyProfile({recruiter,recruiterCompany}) {
   const [errors, setErrors] = useState({});
 
   const startEditing = () => {
-    if (company) {
-      setIndustry(company.industry);
-      setEmployeeRange(company.employeeRange);
-      setLogoPreview(company.logoUrl);
-      setLogoFile(null);
-    }
-    setIsEditing(true);
-  };
+  console.log(company, "from company page");
 
+  if (company) {
+    setIndustry(company.industry);
+    setEmployeeRange(company.employeeRange);
+    setLogoPreview(company.logoUrl || "");
+    setLogoFile(null);
+  }
+
+  setIsEditing(true);
+};
   const handleFileChange =async (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -169,7 +171,7 @@ export default function CompanyProfile({recruiter,recruiterCompany}) {
       </div>
 
       {/* ── EMPTY PROMPT STATE ─────────────────────────────────────────── */}
-      {!company && !isEditing && (
+      {!company._id && !isEditing && (
         <Card className="p-8 text-center bg-[#0f0f11] border border-neutral-800 space-y-4">
           <div className="w-12 h-12 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center mx-auto">
             <Building2 className="w-6 h-6 text-neutral-500" />
@@ -454,7 +456,7 @@ export default function CompanyProfile({recruiter,recruiterCompany}) {
               </div>
             </div>
             <Link
-              href={company.websiteUrl}
+              href={company?.websiteUrl ||"#"}
               target="_blank"
               rel="noopener noreferrer"
             >
