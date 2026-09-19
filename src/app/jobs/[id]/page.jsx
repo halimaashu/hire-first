@@ -20,7 +20,7 @@ const JobDetailPage = async ({ params }) => {
     );
   }
 
-  return <JobDetailView job={job} />;
+  return <JobDetailView job={job} id={id}/>;
 };
 
 export default JobDetailPage;

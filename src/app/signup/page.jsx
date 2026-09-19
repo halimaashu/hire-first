@@ -13,12 +13,15 @@ import {
 } from "@heroui/react";
 
 import { authClient } from "@/lib/auth-client";
-import { redirect } from "next/navigation";
+import {  useRouter, useSearchParams } from "next/navigation";
 
 export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const searchParams=useSearchParams();
+  const redirectTo=searchParams.get("redirect")||"/";
+  const router=useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,14 +40,14 @@ export default function SignupPage() {
       password, // required
       role,
       image: photoURL || "https://example.com/image.png",
-      callbackURL: "/",
+      
     });
     if (error) {
       alert(`error: ${error.message}`);
     }
     if (data) {
       alert("Account created successfully!");
-      redirect("/");
+      router.push(redirectTo)
     }
   };
 
@@ -148,7 +151,7 @@ export default function SignupPage() {
           {/* Footer */}
           <p className="mt-6 text-center text-sm text-gray-400">
             Already have an account?{" "}
-            <Link href="/signin" className="text-primary hover:underline">
+            <Link href={`/signin?redirect=${redirectTo}`} className="text-violet-500 hover:underline">
               Sign In
             </Link>
           </p>

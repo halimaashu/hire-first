@@ -208,17 +208,17 @@ export default function JobCard({
         <Link
           type="button"
          href={`/jobs/${_id}`}
-          className="
+         className="
             flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg
-            border border-neutral-800 h-9 text-xs font-medium text-neutral-300
-            hover:text-white hover:border-neutral-600 transition-all duration-200
+            bg-violet-600 hover:bg-violet-500 h-9 text-xs font-semibold text-white
+            transition-all duration-200
           "
         >
           <ArrowUpRightFromSquare className="w-3.5 h-3.5" />
           View Details
         </Link>
 
-        <button
+        {/* <button
           type="button"
           onClick={handleApply}
           className="
@@ -229,7 +229,7 @@ export default function JobCard({
         >
           <PaperPlane className="w-3.5 h-3.5" />
           Apply
-        </button>
+        </button> */}
       </div>
     </div>
   );

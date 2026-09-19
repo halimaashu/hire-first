@@ -52,9 +52,10 @@ export default function Banner() {
       <div className="relative z-10 mx-auto max-w-7xl px-4 pt-28 pb-16 lg:px-8">
         {/* Heading */}
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-semibold text-white md:text-5xl">
+          <h2 className="text-4xl font-bold text-white md:text-5xl mb-3">
             Assisting over{" "}
             <span className="text-white">15,000</span>{" "}
+            <br />
             job seekers
           </h2>
 

@@ -5,12 +5,15 @@ import Link from "next/link";
 import { Card, Input, Button } from "@heroui/react";
 
 import { authClient } from "@/lib/auth-client";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function SigninPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
-
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/";
+  const router = useRouter();
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -21,13 +24,15 @@ export default function SigninPage() {
     const formData = new FormData(e.currentTarget);
 
     const userData = Object.fromEntries(formData.entries());
-    const {  email, password } = userData;
+    const { email, password } = userData;
     const { data, error } = await authClient.signIn.email({
-    email, // required
-    password, // required
-    rememberMe: true,
-    callbackURL: "/",
-});
+      email, // required
+      password, // required
+      rememberMe: true,
+    });
+    if(data){
+      router.push(redirectTo)
+    }
   };
 
   return (
@@ -89,10 +94,7 @@ export default function SigninPage() {
           {/* Footer */}
           <p className="mt-6 text-center text-sm text-gray-400">
             Don’t have an account?{" "}
-            <Link
-              href="/signup"
-              className="text-primary hover:underline"
-            >
+            <Link href={`/signup?redirect=${redirectTo}`}className="text-violet-500  hover:underline">
               Sign Up
             </Link>
           </p>

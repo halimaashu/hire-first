@@ -14,6 +14,7 @@ import {
   TagDollar,
   Star,
 } from "@gravity-ui/icons";
+import Link from "next/link";
 
 const CURRENCY_SYMBOLS = {
   USD: "$",
@@ -80,7 +81,7 @@ const item = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
 };
 
-export default function JobDetailView({ job }) {
+export default function JobDetailView({ job ,id}) {
   const router = useRouter();
 
   const {
@@ -121,11 +122,7 @@ export default function JobDetailView({ job }) {
   const requirementItems = parseBullets(requirements);
   const benefitItems = parseBullets(benefits);
 
-  const handleApply = () => {
-    // TODO: wire to your real apply flow, e.g.
-    // router.push(`/jobs/${_id}/apply`)
-    console.log("Apply clicked for job:", _id);
-  };
+
 
   return (
     <div className="min-h-screen bg-black">
@@ -215,19 +212,19 @@ export default function JobDetailView({ job }) {
               </span>
             )}
 
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleApply}
+            <Link
+             href={`/jobs/${id}/apply`}
+             
+             
               className="
                 ml-auto inline-flex items-center gap-2 rounded-lg bg-violet-600
                 hover:bg-violet-500 h-11 px-6 text-sm font-semibold text-white
                 transition-colors duration-200
               "
-            >
-              <PaperPlane className="w-4 h-4" />
+            ><PaperPlane className="w-4 h-4" />
+              
               Apply Now
-            </motion.button>
+            </Link>
           </div>
         </motion.div>
 
@@ -320,8 +317,9 @@ export default function JobDetailView({ job }) {
           variants={item}
           className="sm:hidden sticky bottom-4 mt-2"
         >
-          <button
-            onClick={handleApply}
+          <Link
+          href={`/jobs/${id}/apply`}
+          
             className="
               w-full inline-flex items-center justify-center gap-2 rounded-xl
               bg-violet-600 hover:bg-violet-500 h-12 text-sm font-semibold text-white
@@ -330,7 +328,7 @@ export default function JobDetailView({ job }) {
           >
             <PaperPlane className="w-4 h-4" />
             Apply Now
-          </button>
+          </Link>
         </motion.div>
       </motion.div>
     </div>

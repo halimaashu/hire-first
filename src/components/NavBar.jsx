@@ -19,7 +19,7 @@ export default function NavBar() {
     { label: "Home", href: "/" },
     { label: "Browse Jobs", href: "/jobs" },
     { label: "Company", href: "/company" },
-    { label: "Pricing", href: "/pricing" },
+    { label: "Pricing", href: "/plans" },
   ];
 
   return (
