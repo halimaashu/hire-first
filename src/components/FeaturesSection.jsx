@@ -33,7 +33,7 @@ const features = [
   },
   {
     icon: LayoutHeaderCursor,
-    title: 'One-Click Apply',
+    title: 'One-Click ',
     description: 'Simplify your job applications for an easier process.',
   },
   {

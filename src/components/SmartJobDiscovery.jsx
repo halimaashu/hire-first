@@ -6,65 +6,20 @@ import {
   ArrowRight,
 } from '@gravity-ui/icons';
 import Link from 'next/link';
+import { Slice } from 'lucide-react';
 
-const jobCards = [
-  {
-    id: 1,
-    title: 'Frontend Developer',
-    description:
-      'Showcase your commitment to diversity and inclusion by highlighting initiatives',
-    location: 'New York, USA',
-    type: 'Hybrid',
-    salary: '€25-€40/hour',
-  },
-  {
-    id: 2,
-    title: 'Frontend Developer',
-    description:
-      'Showcase your commitment to diversity and inclusion by highlighting initiatives',
-    location: 'New York, USA',
-    type: 'Hybrid',
-    salary: '€25-€40/hour',
-  },
-  {
-    id: 3,
-    title: 'Frontend Developer',
-    description:
-      'Showcase your commitment to diversity and inclusion by highlighting initiatives',
-    location: 'New York, USA',
-    type: 'Hybrid',
-    salary: '€25-€40/hour',
-  },
-  {
-    id: 4,
-    title: 'Frontend Developer',
-    description:
-      'Showcase your commitment to diversity and inclusion by highlighting initiatives',
-    location: 'New York, USA',
-    type: 'Hybrid',
-    salary: '€25-€40/hour',
-  },
-  {
-    id: 5,
-    title: 'Frontend Developer',
-    description:
-      'Showcase your commitment to diversity and inclusion by highlighting initiatives',
-    location: 'New York, USA',
-    type: 'Hybrid',
-    salary: '€25-€40/hour',
-  },
-  {
-    id: 6,
-    title: 'Frontend Developer',
-    description:
-      'Showcase your commitment to diversity and inclusion by highlighting initiatives',
-    location: 'New York, USA',
-    type: 'Hybrid',
-    salary: '€25-€40/hour',
-  },
-];
 
-export default function SmartJobDiscovery() {
+
+
+export default async function SmartJobDiscovery() {
+  // http://localhost:5000/api/allJobs
+  const featuredJobs= await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/allJobs`);
+  const jobsData = await featuredJobs.json();
+  const jobCards=jobsData.slice(-6)
+  console.log(jobCards)
+
+
+  
   return (
     <section className="bg-[#08080a] text-white py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto text-center">
@@ -87,18 +42,18 @@ export default function SmartJobDiscovery() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left mb-12">
           {jobCards.map((job) => (
             <div
-              key={job.id}
+              key={job._id}
               className="bg-[#121215] border border-zinc-800/60 rounded-2xl p-6 flex flex-col justify-between hover:border-zinc-700 transition duration-200"
             >
               <div>
                 {/* Job Title */}
                 <h3 className="text-xl font-semibold text-white mb-2">
-                  {job.title}
+                  {job.jobTitle}
                 </h3>
 
                 {/* Job Description */}
                 <p className="text-xs text-gray-400 leading-relaxed mb-6">
-                  {job.description}
+                  {job.responsibilities}
                 </p>
 
                 {/* Badges / Details */}
@@ -106,13 +61,13 @@ export default function SmartJobDiscovery() {
                   {/* Location Tag */}
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-[#1a1a20] text-gray-300 border border-zinc-800">
                     <MapPin className="w-3.5 h-3.5 text-pink-400" />
-                    {job.location}
+                    {job.jobCountry}
                   </span>
 
                   {/* Work Type Tag */}
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-[#1a1a20] text-gray-300 border border-zinc-800">
                     <Briefcase className="w-3.5 h-3.5 text-pink-400" />
-                    {job.type}
+                    {job.experienceLevel}
                   </span>
                 </div>
 
@@ -120,20 +75,20 @@ export default function SmartJobDiscovery() {
                 <div className="mb-6">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-[#1a1a20] text-gray-300 border border-zinc-800">
                     <CircleDollar className="w-3.5 h-3.5 text-pink-400" />
-                    {job.salary}
+                    {job.maxSalary}
                   </span>
                 </div>
               </div>
 
               {/* Apply Link */}
               <div>
-                <a
-                  href="#"
+                <Link
+                 href={`/jobs/${job._id}`}
                   className="inline-flex items-center text-xs font-semibold text-gray-200 hover:text-white group transition duration-150"
                 >
                   Apply Now
                   <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-1 text-gray-400 group-hover:text-white" />
-                </a>
+                </Link>
               </div>
             </div>
           ))}

@@ -4,19 +4,19 @@ import Image from "next/image";
 
 const profiles = [
   {
-    name: "Anna Sulia",
+    name: "Candidate 1",
     role: "Product Designer",
     avatar: "/images/manCartoon.jpg",
     bgAccent: "bg-teal-500/20",
   },
   {
-    name: "Natasha Dusan",
+    name: "Candidate 2",
     role: "UX Designer",
     avatar: "/images/wemanCartoon.jpg",
     bgAccent: "bg-pink-500/20",
   },
   {
-    name: "Benjamin Rowe",
+    name: "ms. Johnson",
     role: "HR Recruiter",
     avatar: "/images/recruiterCartoon.jpg",
     bgAccent: "bg-purple-500/20",

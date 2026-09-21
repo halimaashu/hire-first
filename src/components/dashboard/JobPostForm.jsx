@@ -25,6 +25,7 @@ import {
   ArrowUpFromLine,
   ChevronDown,
 } from "@gravity-ui/icons";
+import toast from "react-hot-toast";
 
 const JobPostForm = ({ companyData, planLimits }) => {
   const [isRemote, setIsRemote] = useState(false);
@@ -57,7 +58,7 @@ const JobPostForm = ({ companyData, planLimits }) => {
       });
 
       if (response.ok) {
-        alert(
+        toast.success(
           "Company profile registered and Job post published successfully!",
         );
       }

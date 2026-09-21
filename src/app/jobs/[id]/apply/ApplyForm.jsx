@@ -15,6 +15,7 @@ import {
 } from "@heroui/react";
 import { ArrowLeft } from "@gravity-ui/icons";
 import { postApplication } from "@/lib/actions/application";
+import toast from "react-hot-toast";
 
 const ApplyForm = ({ applicant, jobInfo }) => {
     const router=useRouter()
@@ -41,11 +42,11 @@ const ApplyForm = ({ applicant, jobInfo }) => {
         ...data
       }
       const res = await postApplication(applicationFullData);
-      alert("success");
+      toast.success("Application submitted successfully!");
       router.push("/jobs")
       
     } catch (error) {
-      alert(`error :${error.message}`);
+      toast.error(`error :${error.message}`);
     }
     // This will now output your text links and the corresponding jobId
   };

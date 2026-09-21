@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import {
   Card,
@@ -13,15 +14,18 @@ import {
 } from "@heroui/react";
 
 import { authClient } from "@/lib/auth-client";
-import {  useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import toast from "react-hot-toast";
 
-export default function SignupPage() {
+function SignupContent() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
-  const searchParams=useSearchParams();
-  const redirectTo=searchParams.get("redirect")||"/";
-  const router=useRouter();
+
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/";
+
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,36 +38,47 @@ export default function SignupPage() {
 
     const userData = Object.fromEntries(formData.entries());
     const { name, email, password, photoURL, role } = userData;
+
     const { data, error } = await authClient.signUp.email({
-      name, // required
-      email, // required
-      password, // required
+      name,
+      email,
+      password,
       role,
       image: photoURL || "https://example.com/image.png",
-      
     });
+
     if (error) {
-      alert(`error: ${error.message}`);
+      toast.error(`error: ${error.message}`);
     }
+
     if (data) {
-      alert("Account created successfully!");
-      router.push(redirectTo)
+      toast.success("Account created successfully!");
+      router.push(redirectTo);
     }
+
+    setLoading(false);
   };
 
   return (
     <section className="min-h-screen bg-black flex items-center justify-center px-4 py-10">
       <Card className="w-full max-w-md border border-white/10 bg-zinc-950">
         <div className="p-8">
+
           {/* Header */}
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-white">Create Account</h1>
-            <p className="mt-2 text-gray-400">Join HireLoop today</p>
+            <h1 className="text-3xl font-bold text-white">
+              Create Account
+            </h1>
+
+            <p className="mt-2 text-gray-400">
+              Join HireLoop today
+            </p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* name */}
+
+            {/* Name */}
             <Input
               name="name"
               className="text-white placeholder:text-gray-500 w-full"
@@ -72,7 +87,8 @@ export default function SignupPage() {
               variant="bordered"
               required
             />
-            {/* email */}
+
+            {/* Email */}
             <Input
               className="text-white placeholder:text-gray-500 w-full"
               name="email"
@@ -82,7 +98,8 @@ export default function SignupPage() {
               variant="bordered"
               required
             />
-            {/* password */}
+
+            {/* Password */}
             <Input
               className="text-white placeholder:text-gray-500 w-full"
               name="password"
@@ -92,6 +109,7 @@ export default function SignupPage() {
               variant="bordered"
               required
             />
+
             {/* Photo URL */}
             <Input
               className="text-white placeholder:text-gray-500 w-full"
@@ -101,29 +119,40 @@ export default function SignupPage() {
               placeholder="Photo URL"
               variant="bordered"
             />
+
             {/* Role */}
             <RadioGroup defaultValue="seeker" name="role">
               <Label>Role</Label>
-              <Description>Choose the role that suits you best</Description>
+
+              <Description>
+                Choose the role that suits you best
+              </Description>
+
               <Radio value="recruiter">
                 <Radio.Control>
                   <Radio.Indicator />
                 </Radio.Control>
+
                 <Radio.Content>
                   <Label>Recruiter</Label>
-                  <Description>Includes 100 messages per month</Description>
+                  <Description>
+                    Includes 100 messages per month
+                  </Description>
                 </Radio.Content>
               </Radio>
+
               <Radio selected value="seeker">
                 <Radio.Control>
                   <Radio.Indicator />
                 </Radio.Control>
+
                 <Radio.Content>
                   <Label>Job Seeker</Label>
-                  <Description>Includes 200 messages per month</Description>
+                  <Description>
+                    Includes 200 messages per month
+                  </Description>
                 </Radio.Content>
               </Radio>
-             
             </RadioGroup>
 
             {error && (
@@ -151,12 +180,26 @@ export default function SignupPage() {
           {/* Footer */}
           <p className="mt-6 text-center text-sm text-gray-400">
             Already have an account?{" "}
-            <Link href={`/signin?redirect=${redirectTo}`} className="text-violet-500 hover:underline">
+
+            <Link
+              href={`/signin?redirect=${redirectTo}`}
+              className="text-violet-500 hover:underline"
+            >
               Sign In
             </Link>
           </p>
+
         </div>
       </Card>
     </section>
   );
 }
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignupContent />
+    </Suspense>
+  );
+}
+

@@ -1,19 +1,23 @@
+
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { Card, Input, Button } from "@heroui/react";
 
 import { authClient } from "@/lib/auth-client";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function SigninPage() {
+function SigninContent() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/";
+
   const router = useRouter();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -22,26 +26,38 @@ export default function SigninPage() {
     setSuccess("");
 
     const formData = new FormData(e.currentTarget);
-
     const userData = Object.fromEntries(formData.entries());
+
     const { email, password } = userData;
+
     const { data, error } = await authClient.signIn.email({
-      email, // required
-      password, // required
+      email,
+      password,
       rememberMe: true,
     });
-    if(data){
-      router.push(redirectTo)
+
+    if (data) {
+      router.push(redirectTo);
     }
+
+    if (error) {
+      setError(error.message || "Something went wrong");
+    }
+
+    setLoading(false);
   };
 
   return (
     <section className="min-h-screen bg-black flex items-center justify-center px-4 py-10">
       <Card className="w-full max-w-md border border-white/10 bg-zinc-950">
         <div className="p-8">
+
           {/* Header */}
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-white">Welcome Back</h1>
+            <h1 className="text-3xl font-bold text-white">
+              Welcome Back
+            </h1>
+
             <p className="mt-2 text-gray-400">
               Sign in to your HireLoop account
             </p>
@@ -49,6 +65,7 @@ export default function SigninPage() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
+
             <Input
               className="text-white placeholder:text-gray-500 w-full"
               name="email"
@@ -89,17 +106,32 @@ export default function SigninPage() {
             >
               Sign In
             </Button>
+
           </form>
 
           {/* Footer */}
           <p className="mt-6 text-center text-sm text-gray-400">
             Don’t have an account?{" "}
-            <Link href={`/signup?redirect=${redirectTo}`}className="text-violet-500  hover:underline">
+
+            <Link
+              href={`/signup?redirect=${redirectTo}`}
+              className="text-violet-500 hover:underline"
+            >
               Sign Up
             </Link>
           </p>
+
         </div>
       </Card>
     </section>
   );
 }
+
+export default function SigninPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SigninContent />
+    </Suspense>
+  );
+}
+
