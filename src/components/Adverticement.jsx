@@ -1,96 +1,89 @@
 "use client";
-import React, { useState } from "react";
-import { Magnifier } from "@gravity-ui/icons";
-import { Button } from "@heroui/react";
+
+import { useEffect, useRef } from "react";
 import Link from "next/link";
+import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
+
+const display = Bricolage_Grotesque({ subsets: ["latin"], display: "swap" });
+const body = Instrument_Sans({ subsets: ["latin"], display: "swap" });
 
 export default function Advertisement() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const videoRef = useRef(null);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    // Handle search logic here
-    console.log("Searching for:", searchQuery);
-  };
+  // React doesn't always set `muted` on the DOM element, and browsers block
+  // autoplay for unmuted video. Force it, then start playback.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = true;
+    video.defaultMuted = true;
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        // Autoplay blocked; the navy background stays visible
+      });
+    }
+  }, []);
 
   return (
-    <section className="relative w-full h-[80vh] min-h-[500px] flex items-center justify-center overflow-hidden px-4 sm:px-6 ">
-      {/* Background Video with Dark Overlay */}
-      <div className="absolute inset-0 -z-10 bg-black/50 ">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute min-w-full min-h-full w-auto h-auto top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-cover"
-        >
-          <source src="/video/interview.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      </div>
+    <section
+      className={`${body.className} relative isolate flex min-h-[34rem] w-full items-center justify-center overflow-hidden bg-[#050B1A] px-4 py-20 sm:px-6 md:h-[85svh]`}
+    >
+      {/* Background video (hidden for reduced-motion users, who see the navy fallback) */}
+     <video
+  ref={videoRef}
+  autoPlay
+  muted
+  loop
+  playsInline
+  preload="auto"
+  aria-hidden="true"
+  className="absolute inset-0 h-full w-full object-cover -z-10"
+  onLoadedData={() => console.log("VIDEO: loaded")}
+  onPlaying={() => console.log("VIDEO: playing")}
+  onError={(e) =>
+    console.log("VIDEO ERROR:", e.currentTarget.error?.code, e.currentTarget.error?.message)
+  }
+  src="/video/bg-video.mp4"
+/>
 
-      {/* Hero Content */}
-      <div className="text-center z-10 max-w-3xl mx-auto flex flex-col items-center">
-        {/* Title */}
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight  text-gray-100 leading-none mb-6 transition-all duration-500 hover:text-transparent hover:[webkit-text-stroke:2px_#fff]">
-          Your next role is already 
-         <br />
-          looking for youk
+      {/* Navy-blue overlay keeps the text readable in light and dark mode */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 bg-gradient-to-b from-[#050B1A]/80 via-blue-950/65 to-[#050B1A]/85"
+      />
+
+      {/* Content */}
+      <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
+        <h1
+          className={`${display.className} text-balance text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-7xl`}
+        >
+          Your next role is already looking for you.
         </h1>
 
-        <p className="text-gray-200 text-medium sm:text-lg mb-8 max-w-xl">
-         Build a profile in three minutes. The matches 
-         <br />
-         start arriving tomorrow morning.
+        <p className="mt-6 max-w-xl text-balance text-base leading-relaxed text-slate-200 sm:text-lg">
+          Build a profile in three minutes. The matches start arriving
+          tomorrow morning.
         </p>
 
-        {/* Search Bar & Action Buttons */}
-        {/* <form
-          onSubmit={handleSearch}
-          className="w-full max-w-xl flex flex-col sm:flex-row items-center gap-3 bg-zinc-900/80 backdrop-blur-md p-2 rounded-2xl border border-zinc-700/60 shadow-2xl"
-        >
-        
-          <div className="relative w-full flex items-center pl-3">
-            <Magnifier className="w-5 h-5 text-gray-400 mr-2 flex-shrink-0" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search job title, skills, or keywords..."
-              className="w-full bg-transparent text-white text-sm focus:outline-none placeholder-gray-400 py-2"
-            />
-          </div>
-
-       
-          <div className="flex w-full sm:w-auto gap-2">
-            <button
-              type="submit"
-              className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition duration-200"
-            >
-              Search
-            </button>
-            <a
-              href="#get-started"
-              className="w-full sm:w-auto text-center border border-zinc-600 hover:bg-white hover:text-black text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition duration-200 whitespace-nowrap"
-            >
-              Get Started
-            </a>
-          </div>
-        </form> */}
-        <div className="flex gap-4 mt-6 justify-center items-center">
-           <Link href="/signup">
-            <Button className="bg-white text-black px-10 py-2 rounded-xl" variant="solid">
-                get started
-
-            </Button>
-           </Link>
-           <Link href="/plans">
-            <Button className="border-2 border-white px-10 py-2 rounded-xl" variant="outline">
-                view Pricing
-            </Button>
-           </Link>
+        <div className="mt-10 flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row sm:gap-4">
+          <Link
+            href="/signup"
+            className="inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-600/30 transition-colors hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#050B1A] sm:w-auto"
+          >
+            Get started
+          </Link>
+          <Link
+            href="/plans"
+            className="inline-flex w-full items-center justify-center rounded-xl border border-white/30 bg-white/10 px-8 py-3.5 text-base font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#050B1A] sm:w-auto"
+          >
+            View pricing
+          </Link>
         </div>
 
+        <p className="mt-8 text-sm text-slate-300">
+          Join 2M job seekers already on the platform.
+        </p>
       </div>
     </section>
   );

@@ -1,125 +1,126 @@
-import React from "react";
-import { Check, Gear, Globe } from "@gravity-ui/icons";
+import { Check, Gear } from "@gravity-ui/icons";
 import Image from "next/image";
+import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
 
-const profiles = [
+const display = Bricolage_Grotesque({ subsets: ["latin"], display: "swap" });
+const body = Instrument_Sans({ subsets: ["latin"], display: "swap" });
+
+const candidates = [
   {
     name: "Candidate 1",
     role: "Product Designer",
     avatar: "/images/manCartoon.jpg",
-    bgAccent: "bg-teal-500/20",
+    accent: "bg-sky-500/25",
   },
   {
     name: "Candidate 2",
     role: "UX Designer",
     avatar: "/images/wemanCartoon.jpg",
-    bgAccent: "bg-pink-500/20",
-  },
-  {
-    name: "ms. Johnson",
-    role: "HR Recruiter",
-    avatar: "/images/recruiterCartoon.jpg",
-    bgAccent: "bg-purple-500/20",
+    accent: "bg-indigo-500/25",
   },
 ];
 
+const recruiter = {
+  name: "Ms. Johnson",
+  role: "HR Recruiter",
+  avatar: "/images/recruiterCartoon.jpg",
+  accent: "bg-blue-500/30",
+};
+
+function ProfileCard({ profile, highlight = false }) {
+  return (
+    <div
+      className={`w-36 rounded-2xl border bg-white p-4 text-center shadow-sm transition-transform duration-300 motion-safe:hover:-translate-y-1 dark:bg-[#0B1530] dark:shadow-none sm:w-48 sm:p-5 ${
+        highlight
+          ? "border-blue-600/40 dark:border-blue-500/50"
+          : "border-slate-200 dark:border-white/10"
+      }`}
+    >
+      <div className="relative mx-auto mb-3 w-fit">
+        <div
+          className={`relative h-20 w-20 rounded-full p-1 sm:h-24 sm:w-24 ${profile.accent}`}
+        >
+          <div className="relative h-full w-full overflow-hidden rounded-full">
+            <Image
+              src={profile.avatar}
+              alt={`${profile.name}, ${profile.role}`}
+              fill
+              sizes="96px"
+              className="object-cover"
+            />
+          </div>
+        </div>
+
+        {/* Verified badge */}
+        <span
+          className="absolute right-0 top-0 rounded-full border-2 border-white bg-emerald-500 p-1 text-white dark:border-[#0B1530]"
+          title="Verified"
+        >
+          <Check className="h-3 w-3" aria-hidden="true" />
+          <span className="sr-only">Verified</span>
+        </span>
+      </div>
+
+      <h3
+        className={`${display.className} text-sm font-bold text-slate-950 dark:text-white sm:text-base`}
+      >
+        {profile.name}
+      </h3>
+      <p className="mt-1 text-xs text-slate-600 dark:text-slate-400 sm:text-sm">
+        {profile.role}
+      </p>
+    </div>
+  );
+}
+
 export default function GlobalTalentSection() {
   return (
-    <section className="bg-[#0b0b0d] text-white py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background Dot Grid Pattern */}
-      <div 
-        className="absolute inset-0 opacity-15 pointer-events-none"
-        style={{
-          backgroundImage: "radial-gradient(#ffffff 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
-        }}
+    <section
+      className={`${body.className} relative overflow-hidden bg-slate-50 px-4 py-14 text-slate-900 dark:bg-[#050B1A] dark:text-slate-100 sm:px-6 sm:py-20 lg:px-8`}
+    >
+      {/* Dot grid */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] opacity-40 [background-size:24px_24px] dark:bg-[radial-gradient(#ffffff_1px,transparent_1px)] dark:opacity-10"
       />
 
-      <div className="max-w-5xl mx-auto relative z-10">
-        {/* Outer Container Border Frame */}
-        <div className="border border-zinc-800/80 rounded-3xl p-8 sm:p-12 bg-gradient-to-b from-zinc-900/40 to-transparent backdrop-blur-sm">
-          
-          {/* Top Profile Cards Container */}
-          <div className="relative flex flex-wrap items-center justify-center gap-6 sm:gap-8 mb-12">
-            
-            {/* Horizontal Connecting Line behind cards */}
-            <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-[1px] bg-gradient-to-r from-transparent via-zinc-700/60 to-transparent -z-10" />
-
-            {/* Profile 1 & 2 Group */}
-            <div className="flex gap-4 sm:gap-6">
-              {profiles.slice(0, 2).map((profile, idx) => (
-                <div
-                  key={idx}
-                  className="bg-[#141417] border border-zinc-800/90 rounded-2xl p-5 w-44 sm:w-48 text-center shadow-xl transition-transform duration-300 hover:-translate-y-1"
-                >
-                  {/* Avatar Container */}
-                  <div className="relative inline-block mb-3">
-                    <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden p-1 ${profile.bgAccent}`}>
-                      <Image
-                        src={profile.avatar}
-                        alt={profile.name}
-                        fill
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                    </div>
-                    {/* Verified Green Badge */}
-                    <div className="absolute top-0 right-0 bg-emerald-400 text-black p-1 rounded-full border-2 border-[#141417]">
-                      <Check className="w-3 h-3" />
-                    </div>
-                  </div>
-
-                  {/* Name and Role */}
-                  <h3 className="text-sm sm:text-base font-semibold text-gray-100">
-                    {profile.name}
-                  </h3>
-                  <p className="text-xs text-gray-400 mt-1">{profile.role}</p>
-                </div>
+      <div className="relative mx-auto max-w-5xl">
+        <div className="rounded-3xl border border-slate-200 bg-white/80 p-6 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.03] sm:p-10 lg:p-12">
+          {/* Profiles: candidates → connector → recruiter */}
+          <div className="mb-10 flex flex-col items-center gap-3 sm:mb-12 md:flex-row md:justify-center md:gap-4">
+            <div className="flex gap-3 sm:gap-6">
+              {candidates.map((profile) => (
+                <ProfileCard key={profile.name} profile={profile} />
               ))}
             </div>
 
-            {/* Connecting Spinner Icon */}
-            <div className="hidden lg:flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 border border-zinc-700/60 text-gray-400 my-auto">
-              <Gear className="w-4 h-4 animate-spin text-gray-400" />
+            <div className="flex flex-col items-center gap-2 md:flex-row">
+              <span className="h-5 w-px bg-slate-300 dark:bg-white/20 md:h-px md:w-8" />
+              <span className="flex h-9 w-9 items-center justify-center rounded-full border border-blue-600/30 bg-blue-50 text-blue-600 dark:border-blue-500/40 dark:bg-blue-500/10 dark:text-blue-400">
+                <Gear
+                  className="h-4 w-4 motion-safe:animate-spin"
+                  aria-hidden="true"
+                />
+              </span>
+              <span className="h-5 w-px bg-slate-300 dark:bg-white/20 md:h-px md:w-8" />
             </div>
 
-            {/* Profile 3 */}
-            <div className="bg-[#141417] border border-zinc-800/90 rounded-2xl p-5 w-44 sm:w-48 text-center shadow-xl transition-transform duration-300 hover:-translate-y-1">
-              <div className="relative inline-block mb-3">
-                <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden p-1 ${profiles[2].bgAccent}`}>
-                  <Image
-                    src={profiles[2].avatar}
-                    fill
-                    alt={profiles[2].name}
-                   
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                </div>
-                <div className="absolute top-0 right-0 bg-emerald-400 text-black p-1 rounded-full border-2 border-[#141417]">
-                  <Check className="w-3 h-3" />
-                </div>
-              </div>
-              <h3 className="text-sm sm:text-base font-semibold text-gray-100">
-                {profiles[2].name}
-              </h3>
-              <p className="text-xs text-gray-400 mt-1">{profiles[2].role}</p>
-            </div>
+            <ProfileCard profile={recruiter} highlight />
           </div>
 
-          {/* Bottom Heading & Description */}
-          <div className="text-center max-w-xl mx-auto">
-            <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-medium">
-              <Globe className="w-3.5 h-3.5" />
-              <span>GLOBAL RECRUITMENT</span>
-            </div>
-
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-3">
-              Find global & multilingual talent
+          {/* Heading and description */}
+          <div className="mx-auto max-w-xl text-center">
+            <h2
+              className={`${display.className} text-balance text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-4xl`}
+            >
+              Find global and multilingual talent
             </h2>
-            <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
-              Build and scale your worldwide hiring effortlessly with direct access to vetted candidate profiles across top technical and creative fields.
+            <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
+              Build and scale your worldwide hiring with direct access to
+              vetted candidate profiles across top technical and creative
+              fields.
             </p>
           </div>
-
         </div>
       </div>
     </section>

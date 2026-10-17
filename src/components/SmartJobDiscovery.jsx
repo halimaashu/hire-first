@@ -1,109 +1,111 @@
-import React from 'react';
-import {
-  MapPin,
-  Briefcase,
-  CircleDollar,
-  ArrowRight,
-} from '@gravity-ui/icons';
-import Link from 'next/link';
-import { Slice } from 'lucide-react';
+import { MapPin, Briefcase, CircleDollar, ArrowRight } from "@gravity-ui/icons";
+import Link from "next/link";
+import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
 
+const display = Bricolage_Grotesque({ subsets: ["latin"], display: "swap" });
+const body = Instrument_Sans({ subsets: ["latin"], display: "swap" });
 
+async function getLatestJobs() {
+  try {
+    const base = (process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
+    const res = await fetch(`${base}/api/allJobs`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data.slice(-6).reverse() : [];
+  } catch {
+    return [];
+  }
+}
 
+const tag =
+  "inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300";
+const tagIcon = "h-3.5 w-3.5 text-blue-600 dark:text-blue-400";
 
 export default async function SmartJobDiscovery() {
-  // http://localhost:5000/api/allJobs
-  const featuredJobs= await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/allJobs`);
-  const jobsData = await featuredJobs.json();
-  const jobCards=jobsData.slice(-6)
-  console.log(jobCards)
+  const jobCards = await getLatestJobs();
 
-
-  
   return (
-    <section className="bg-[#08080a] text-white py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto text-center">
-        {/* Top Tagline Badge */}
-        <div className="flex items-center justify-center space-x-2 mb-4">
-          <span className="h-1.5 w-1.5 rounded-full bg-indigo-500"></span>
-          <span className="text-xs font-semibold tracking-widest text-indigo-400 uppercase">
-            SMART JOB DISCOVERY
-          </span>
-          <span className="h-1.5 w-1.5 rounded-full bg-indigo-500"></span>
-        </div>
-
-        {/* Section Heading */}
-        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-12 text-gray-100">
-          The roles youd never <br className="hidden sm:inline" />
-          find by searching
+    <section
+      className={`${body.className} bg-white px-4 py-14 text-slate-900 dark:bg-[#050B1A] dark:text-slate-100 sm:px-6 sm:py-20 lg:px-8`}
+    >
+      <div className="mx-auto max-w-6xl">
+        {/* Heading */}
+        <h2
+          className={`${display.className} mx-auto mb-10 max-w-2xl text-balance text-center text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:mb-14 sm:text-4xl lg:text-5xl`}
+        >
+          The roles you’d never find by searching
         </h2>
 
-        {/* Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left mb-12">
-          {jobCards.map((job) => (
-            <div
-              key={job._id}
-              className="bg-[#121215] border border-zinc-800/60 rounded-2xl p-6 flex flex-col justify-between hover:border-zinc-700 transition duration-200"
-            >
-              <div>
-                {/* Job Title */}
-                <h3 className="text-xl font-semibold text-white mb-2">
-                  {job.jobTitle}
-                </h3>
+        {/* Cards */}
+        {jobCards.length === 0 ? (
+          <p className="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-slate-600 dark:border-white/15 dark:text-slate-400">
+            No jobs to show right now. Check back soon.
+          </p>
+        ) : (
+          <div className="mb-12 grid grid-cols-1 gap-5 text-left md:grid-cols-2 lg:grid-cols-3">
+            {jobCards.map((job) => (
+              <article
+                key={job._id}
+                className="group flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors hover:border-blue-600/50 dark:border-white/10 dark:bg-[#0B1530] dark:shadow-none dark:hover:border-blue-500/50"
+              >
+                <div>
+                  <h3
+                    className={`${display.className} mb-2 text-xl font-bold text-slate-950 dark:text-white`}
+                  >
+                    {job.jobTitle}
+                  </h3>
 
-                {/* Job Description */}
-                <p className="text-xs text-gray-400 leading-relaxed mb-6">
-                  {job.responsibilities}
-                </p>
+                  <p className="mb-5 line-clamp-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                    {job.responsibilities}
+                  </p>
 
-                {/* Badges / Details */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {/* Location Tag */}
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-[#1a1a20] text-gray-300 border border-zinc-800">
-                    <MapPin className="w-3.5 h-3.5 text-pink-400" />
-                    {job.jobCountry}
-                  </span>
-
-                  {/* Work Type Tag */}
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-[#1a1a20] text-gray-300 border border-zinc-800">
-                    <Briefcase className="w-3.5 h-3.5 text-pink-400" />
-                    {job.experienceLevel}
-                  </span>
+                  <div className="mb-6 flex flex-wrap gap-2">
+                    {job.jobCountry && (
+                      <span className={tag}>
+                        <MapPin className={tagIcon} aria-hidden="true" />
+                        {job.jobCountry}
+                      </span>
+                    )}
+                    {job.experienceLevel && (
+                      <span className={tag}>
+                        <Briefcase className={tagIcon} aria-hidden="true" />
+                        {job.experienceLevel}
+                      </span>
+                    )}
+                    {job.maxSalary && (
+                      <span className={tag}>
+                        <CircleDollar className={tagIcon} aria-hidden="true" />
+                        Up to {job.maxSalary}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                {/* Salary Tag */}
-                <div className="mb-6">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-[#1a1a20] text-gray-300 border border-zinc-800">
-                    <CircleDollar className="w-3.5 h-3.5 text-pink-400" />
-                    {job.maxSalary}
-                  </span>
-                </div>
-              </div>
-
-              {/* Apply Link */}
-              <div>
                 <Link
-                 href={`/jobs/${job._id}`}
-                  className="inline-flex items-center text-xs font-semibold text-gray-200 hover:text-white group transition duration-150"
+                  href={`/jobs/${job._id}`}
+                  className="inline-flex w-fit items-center rounded-md text-sm font-semibold text-blue-700 transition-colors hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
                 >
-                  Apply Now
-                  <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-1 text-gray-400 group-hover:text-white" />
+                  Apply now
+                  <ArrowRight
+                    className="ml-1.5 h-4 w-4 transition-transform motion-safe:group-hover:translate-x-1"
+                    aria-hidden="true"
+                  />
                 </Link>
-              </div>
-            </div>
-          ))}
-        </div>
+              </article>
+            ))}
+          </div>
+        )}
 
-        {/* View All Button */}
-        <div>
-         <Link href="/jobs">
-          <button
-            type="button"
-            className="inline-flex items-center justify-center bg-white text-black font-semibold text-xs px-6 py-3 rounded-xl hover:bg-gray-200 transition duration-150"
+        {/* View all */}
+        <div className="text-center">
+          <Link
+            href="/jobs"
+            className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-7 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-600/25 transition-colors hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#050B1A]"
           >
-            View all job open
-          </button>
-         </Link>
+            View all open jobs
+          </Link>
         </div>
       </div>
     </section>

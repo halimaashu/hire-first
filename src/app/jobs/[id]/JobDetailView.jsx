@@ -1,7 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   Briefcase,
   Calendar,
@@ -15,6 +14,10 @@ import {
   Star,
 } from "@gravity-ui/icons";
 import Link from "next/link";
+import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
+
+const display = Bricolage_Grotesque({ subsets: ["latin"], display: "swap" });
+const body = Instrument_Sans({ subsets: ["latin"], display: "swap" });
 
 const CURRENCY_SYMBOLS = {
   USD: "$",
@@ -25,9 +28,9 @@ const CURRENCY_SYMBOLS = {
 };
 
 const EXPERIENCE_LABELS = {
-  entry: "Entry Level",
-  mid: "Mid Level",
-  senior: "Senior Level",
+  entry: "Entry level",
+  mid: "Mid level",
+  senior: "Senior level",
   lead: "Lead / Principal",
   executive: "Executive",
 };
@@ -40,10 +43,11 @@ const JOB_TYPE_LABELS = {
   internship: "Internship",
 };
 
+// Shows 180000 as "180k" and 1500 as "1.5k"; falls back to the raw value
 function formatSalary(value) {
   const n = Number(value);
   if (!n || Number.isNaN(n)) return value;
-  if (n >= 1000) return `${Math.round(n / 1000)}k`;
+  if (n >= 1000) return `${Number((n / 1000).toFixed(1))}k`;
   return String(n);
 }
 
@@ -59,7 +63,6 @@ function formatDeadline(dateStr) {
 }
 
 // Splits a "- bullet\n- bullet" style block into list items.
-// Falls back to rendering as plain paragraphs if there are no bullets.
 function parseBullets(text) {
   if (!text) return [];
   return text
@@ -81,11 +84,60 @@ const item = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
 };
 
-export default function JobDetailView({ job ,id}) {
-  const router = useRouter();
+const panel =
+  "rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#0B1530] dark:shadow-none sm:p-7";
+
+const pill =
+  "inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300";
+const pillIcon = "h-3.5 w-3.5 text-blue-600 dark:text-blue-400";
+
+function DetailSection({ icon: Icon, title, items, tone = "blue" }) {
+  if (items.length === 0) return null;
+
+  const iconTone =
+    tone === "green"
+      ? "bg-emerald-600/10 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400"
+      : "bg-blue-600/10 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400";
+  const dotTone =
+    tone === "green"
+      ? "bg-emerald-600 dark:bg-emerald-500"
+      : "bg-blue-600 dark:bg-blue-500";
+
+  return (
+    <motion.section variants={item} className={panel}>
+      <div className="mb-4 flex items-center gap-3">
+        <span
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconTone}`}
+        >
+          <Icon width={18} height={18} aria-hidden="true" />
+        </span>
+        <h2
+          className={`${display.className} text-lg font-bold text-slate-950 dark:text-white`}
+        >
+          {title}
+        </h2>
+      </div>
+      <ul className="space-y-3">
+        {items.map((line, i) => (
+          <li
+            key={`${i}-${line}`}
+            className="flex items-start gap-3 text-sm leading-relaxed text-slate-700 dark:text-slate-300 sm:text-base"
+          >
+            <span
+              className={`mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full ${dotTone}`}
+            />
+            {line}
+          </li>
+        ))}
+      </ul>
+    </motion.section>
+  );
+}
+
+export default function JobDetailView({ job, id }) {
+  const reduceMotion = useReducedMotion();
 
   const {
-    _id,
     jobTitle,
     minSalary,
     maxSalary,
@@ -94,7 +146,6 @@ export default function JobDetailView({ job ,id}) {
     responsibilities,
     requirements,
     benefits,
-    jobCategory,
     jobType,
     experienceLevel,
     isRemote,
@@ -107,227 +158,152 @@ export default function JobDetailView({ job ,id}) {
   const symbol = CURRENCY_SYMBOLS[currency] ?? currency;
   const salaryRange =
     minSalary && maxSalary
-      ? `${symbol}${formatSalary(minSalary)} - ${symbol}${formatSalary(maxSalary)}`
+      ? `${symbol}${formatSalary(minSalary)} – ${symbol}${formatSalary(maxSalary)}`
       : null;
 
-  const locationLabel = isRemote
-    ? jobCity
-      ? `${jobCity}${jobCountry ? `, ${jobCountry}` : ""} (Remote)`
-      : "Remote"
-    : jobCity
+  const place = jobCity
     ? `${jobCity}${jobCountry ? `, ${jobCountry}` : ""}`
-    : "Location not specified";
+    : null;
+  const locationLabel = isRemote
+    ? place
+      ? `${place} (Remote)`
+      : "Remote"
+    : place ?? "Location not specified";
 
   const responsibilityItems = parseBullets(responsibilities);
   const requirementItems = parseBullets(requirements);
   const benefitItems = parseBullets(benefits);
 
-
+  const applyHref = `/jobs/${id}/apply`;
 
   return (
-    <div className="min-h-screen bg-black">
+    <div
+      className={`${body.className} min-h-screen bg-slate-50 text-slate-900 dark:bg-[#050B1A] dark:text-slate-100`}
+    >
       <motion.div
         variants={container}
-        initial="hidden"
+        initial={reduceMotion ? false : "hidden"}
         animate="visible"
-        className="max-w-3xl mx-auto px-4 py-10 space-y-6"
+        className="mx-auto max-w-3xl space-y-5 px-4 pb-24 pt-8 sm:space-y-6 sm:px-6 sm:pb-12 sm:pt-12"
       >
         {/* Back link */}
-        <motion.button
-          variants={item}
-          onClick={() => router.back()}
-          className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-300 transition-colors duration-150"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          Back to jobs
-        </motion.button>
+        <motion.div variants={item}>
+          <Link
+            href="/jobs"
+            className="inline-flex items-center gap-2 rounded-md text-sm font-medium text-slate-600 transition-colors hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-slate-400 dark:hover:text-blue-300"
+          >
+            <ArrowLeft width={16} height={16} aria-hidden="true" />
+            Back to jobs
+          </Link>
+        </motion.div>
 
-        {/* Header card */}
-        <motion.div
-          variants={item}
-          className="bg-[#121214] border border-neutral-800/80 rounded-2xl p-7"
-        >
+        {/* Header */}
+        <motion.div variants={item} className={panel}>
           <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-xl bg-[#0f0f11] border border-neutral-800 flex items-center justify-center overflow-hidden shrink-0">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5 sm:h-16 sm:w-16">
               {companyLogo ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={companyLogo}
                   alt={`${companyName} logo`}
-                  className="w-full h-full object-cover"
+                  className="h-full w-full object-cover"
                 />
               ) : (
-                <span className="text-base font-semibold text-neutral-500">
+                <span
+                  className={`${display.className} text-xl font-bold text-blue-600 dark:text-blue-400`}
+                >
                   {companyName?.[0]?.toUpperCase() ?? "?"}
                 </span>
               )}
             </div>
 
-            <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-bold text-white leading-snug">
+            <div className="min-w-0 flex-1">
+              <h1
+                className={`${display.className} text-balance text-2xl font-extrabold leading-tight tracking-tight text-slate-950 dark:text-white sm:text-3xl`}
+              >
                 {jobTitle}
               </h1>
-              <p className="mt-1.5 text-sm text-neutral-400">
+              <p className="mt-1.5 text-base font-medium text-slate-700 dark:text-slate-300">
                 {companyName}
-                <span className="text-neutral-600"> • </span>
+              </p>
+              <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-400">
+                <MapPin
+                  width={14}
+                  height={14}
+                  aria-hidden="true"
+                  className="shrink-0"
+                />
                 {locationLabel}
               </p>
             </div>
           </div>
 
-          {/* Quick facts row */}
+          {/* Quick facts */}
           <div className="mt-6 flex flex-wrap gap-2">
             {salaryRange && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-neutral-800 bg-[#0f0f11] px-3 py-1.5 text-xs text-neutral-300">
-                <TagDollar className="w-3.5 h-3.5 text-neutral-500" />
+              <span className={pill}>
+                <TagDollar className={pillIcon} aria-hidden="true" />
                 {salaryRange}
               </span>
             )}
             {experienceLevel && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-neutral-800 bg-[#0f0f11] px-3 py-1.5 text-xs text-neutral-300">
-                <Star className="w-3.5 h-3.5 text-neutral-500" />
+              <span className={pill}>
+                <Star className={pillIcon} aria-hidden="true" />
                 {EXPERIENCE_LABELS[experienceLevel] ?? experienceLevel}
               </span>
             )}
             {jobType && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-neutral-800 bg-[#0f0f11] px-3 py-1.5 text-xs text-neutral-300">
-                <Briefcase className="w-3.5 h-3.5 text-neutral-500" />
+              <span className={pill}>
+                <Briefcase className={pillIcon} aria-hidden="true" />
                 {JOB_TYPE_LABELS[jobType] ?? jobType}
-              </span>
-            )}
-            {locationLabel && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-neutral-800 bg-[#0f0f11] px-3 py-1.5 text-xs text-neutral-300">
-                <MapPin className="w-3.5 h-3.5 text-neutral-500" />
-                {locationLabel}
               </span>
             )}
           </div>
 
-          {/* Apply button + deadline */}
-          <div className="mt-7 pt-6 border-t border-neutral-800/60 flex items-center justify-between flex-wrap gap-3">
+          {/* Apply and deadline */}
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-6 dark:border-white/10">
             {deadline && (
-              <span className="inline-flex items-center gap-1.5 text-xs text-neutral-500">
-                <Clock className="w-3.5 h-3.5" />
+              <span className="inline-flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-400">
+                <Clock width={16} height={16} aria-hidden="true" />
                 Apply before {formatDeadline(deadline)}
               </span>
             )}
 
             <Link
-             href={`/jobs/${id}/apply`}
-             
-             
-              className="
-                ml-auto inline-flex items-center gap-2 rounded-lg bg-violet-600
-                hover:bg-violet-500 h-11 px-6 text-sm font-semibold text-white
-                transition-colors duration-200
-              "
-            ><PaperPlane className="w-4 h-4" />
-              
-              Apply Now
+              href={applyHref}
+              className="ml-auto hidden h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-7 text-sm font-semibold text-white shadow-md shadow-blue-600/20 transition-colors hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:shadow-none dark:focus-visible:ring-offset-[#0B1530] sm:inline-flex"
+            >
+              <PaperPlane width={16} height={16} aria-hidden="true" />
+              Apply now
             </Link>
           </div>
         </motion.div>
 
-        {/* Responsibilities */}
-        {responsibilityItems.length > 0 && (
-          <motion.section
-            variants={item}
-            className="bg-[#121214] border border-neutral-800/80 rounded-2xl p-7"
-          >
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-7 h-7 rounded-lg bg-violet-600/15 border border-violet-500/20 flex items-center justify-center shrink-0">
-                <ListCheck className="w-3.5 h-3.5 text-violet-400" />
-              </div>
-              <h2 className="text-sm font-semibold text-neutral-100">
-                Responsibilities
-              </h2>
-            </div>
-            <ul className="space-y-2.5">
-              {responsibilityItems.map((line, i) => (
-                <li
-                  key={i}
-                  className="flex items-start gap-2.5 text-sm text-neutral-400 leading-relaxed"
-                >
-                  <span className="mt-2 w-1 h-1 rounded-full bg-neutral-600 shrink-0" />
-                  {line}
-                </li>
-              ))}
-            </ul>
-          </motion.section>
-        )}
+        <DetailSection
+          icon={ListCheck}
+          title="Responsibilities"
+          items={responsibilityItems}
+        />
+        <DetailSection
+          icon={CheckDouble}
+          title="Requirements"
+          items={requirementItems}
+        />
+        <DetailSection
+          icon={Calendar}
+          title="Perks and benefits"
+          items={benefitItems}
+          tone="green"
+        />
 
-        {/* Requirements */}
-        {requirementItems.length > 0 && (
-          <motion.section
-            variants={item}
-            className="bg-[#121214] border border-neutral-800/80 rounded-2xl p-7"
-          >
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-7 h-7 rounded-lg bg-violet-600/15 border border-violet-500/20 flex items-center justify-center shrink-0">
-                <CheckDouble className="w-3.5 h-3.5 text-violet-400" />
-              </div>
-              <h2 className="text-sm font-semibold text-neutral-100">
-                Requirements
-              </h2>
-            </div>
-            <ul className="space-y-2.5">
-              {requirementItems.map((line, i) => (
-                <li
-                  key={i}
-                  className="flex items-start gap-2.5 text-sm text-neutral-400 leading-relaxed"
-                >
-                  <span className="mt-2 w-1 h-1 rounded-full bg-neutral-600 shrink-0" />
-                  {line}
-                </li>
-              ))}
-            </ul>
-          </motion.section>
-        )}
-
-        {/* Benefits */}
-        {benefitItems.length > 0 && (
-          <motion.section
-            variants={item}
-            className="bg-[#121214] border border-neutral-800/80 rounded-2xl p-7"
-          >
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-7 h-7 rounded-lg bg-emerald-600/15 border border-emerald-500/20 flex items-center justify-center shrink-0">
-                <Calendar className="w-3.5 h-3.5 text-emerald-400" />
-              </div>
-              <h2 className="text-sm font-semibold text-neutral-100">
-                Perks & Benefits
-              </h2>
-            </div>
-            <ul className="space-y-2.5">
-              {benefitItems.map((line, i) => (
-                <li
-                  key={i}
-                  className="flex items-start gap-2.5 text-sm text-neutral-400 leading-relaxed"
-                >
-                  <span className="mt-2 w-1 h-1 rounded-full bg-emerald-700 shrink-0" />
-                  {line}
-                </li>
-              ))}
-            </ul>
-          </motion.section>
-        )}
-
-        {/* Sticky apply footer for mobile */}
-        <motion.div
-          variants={item}
-          className="sm:hidden sticky bottom-4 mt-2"
-        >
+        {/* Sticky apply button (mobile only) */}
+        <motion.div variants={item} className="sticky bottom-4 sm:hidden">
           <Link
-          href={`/jobs/${id}/apply`}
-          
-            className="
-              w-full inline-flex items-center justify-center gap-2 rounded-xl
-              bg-violet-600 hover:bg-violet-500 h-12 text-sm font-semibold text-white
-              shadow-2xl shadow-violet-950/50 transition-colors duration-200
-            "
+            href={applyHref}
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 text-sm font-semibold text-white shadow-xl shadow-blue-900/30 transition-colors hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 dark:focus-visible:ring-offset-[#050B1A]"
           >
-            <PaperPlane className="w-4 h-4" />
-            Apply Now
+            <PaperPlane width={16} height={16} aria-hidden="true" />
+            Apply now
           </Link>
         </motion.div>
       </motion.div>

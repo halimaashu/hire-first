@@ -14,6 +14,7 @@ export default function SplitFeatureSection({
   theme = "dark",
 }) {
   const isDark = theme === "dark";
+  
 
   return (
     <Card

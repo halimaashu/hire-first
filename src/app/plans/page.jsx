@@ -1,30 +1,32 @@
 "use client";
 
-import React, { useState } from "react";
-import { Card, Button, Accordion, AccordionItem } from "@heroui/react";
-import { ShieldCheck, Flame } from "@gravity-ui/icons";
+import { useState } from "react";
+import Link from "next/link";
+import { Check, ChevronDown, Flame } from "@gravity-ui/icons";
+import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
 
-export default function PricingPage() {
-  // Toggle state: 'seekers' or 'recruiters'
-  const [activeTab, setActiveTab] = useState("seekers");
+const display = Bricolage_Grotesque({ subsets: ["latin"], display: "swap" });
+const body = Instrument_Sans({ subsets: ["latin"], display: "swap" });
 
-  const seekerPlans = [
+const plans = {
+  seekers: [
     {
+      id: "seeker-free",
       name: "Free",
       price: "$0",
       period: "forever",
       description: "Essential tools for finding and saving jobs.",
       features: [
-        "Browse & save up to 10 jobs",
+        "Browse and save up to 10 jobs",
         "Apply to up to 3 jobs per month",
         "Basic profile visibility",
         "Standard email alerts",
       ],
-      cta: "Current Plan",
-      variant: "bordered",
-      color: "default",
+      cta: "Start free",
+      free: true,
     },
     {
+      id: "seeker-pro",
       name: "Pro",
       price: "$19",
       period: "month",
@@ -36,11 +38,10 @@ export default function PricingPage() {
         "Exclusive salary insights",
       ],
       cta: "Upgrade to Pro",
-      variant: "solid",
-      color: "primary",
       popular: true,
     },
     {
+      id: "seeker-premium",
       name: "Premium",
       price: "$39",
       period: "month",
@@ -53,13 +54,11 @@ export default function PricingPage() {
         "Priority customer support",
       ],
       cta: "Go Premium",
-      variant: "flat",
-      color: "secondary",
     },
-  ];
-
-  const recruiterPlans = [
+  ],
+  recruiters: [
     {
+      id: "recruiter-free",
       name: "Free",
       price: "$0",
       period: "forever",
@@ -68,13 +67,13 @@ export default function PricingPage() {
         "Up to 3 active job posts",
         "Basic applicant management system",
         "Standard listing visibility",
-        "Great for a company's first year",
+        "Great for a company’s first year",
       ],
-      cta: "Start Free",
-      variant: "bordered",
-      color: "default",
+      cta: "Start free",
+      free: true,
     },
     {
+      id: "recruiter-growth",
       name: "Growth",
       price: "$39",
       period: "month",
@@ -83,14 +82,13 @@ export default function PricingPage() {
         "Up to 10 active job posts",
         "Full applicant tracking pipelines",
         "Basic application analytics data",
-        "Dedicated email support lines",
+        "Dedicated email support",
       ],
       cta: "Choose Growth",
-      variant: "solid",
-      color: "primary",
       popular: true,
     },
     {
+      id: "recruiter-enterprise",
       name: "Enterprise",
       price: "$149",
       period: "month",
@@ -104,196 +102,233 @@ export default function PricingPage() {
         "Priority technical support",
       ],
       cta: "Contact Enterprise",
-      variant: "flat",
-      color: "secondary",
     },
-  ];
+  ],
+};
 
-  const currentPlans = activeTab === "seekers" ? seekerPlans : recruiterPlans;
+const faqs = [
+  {
+    q: "Can I cancel my subscription anytime?",
+    a: "Yes, absolutely. You can cancel from your billing dashboard at any moment. You keep full access to your plan features until the end of your current billing period.",
+  },
+  {
+    q: "What is your refund policy?",
+    a: "We offer a 14-day window for full refunds on initial purchases if the platform didn’t add enough value. Reach out to our billing help desk and we will handle it right away.",
+  },
+  {
+    q: "What payment methods do you support?",
+    a: "Checkout is handled securely by Stripe. We accept all major networks including Visa, Mastercard and American Express, plus Apple Pay and Google Pay.",
+  },
+  {
+    q: "Can I switch plans midway through the month?",
+    a: "Yes, you can upgrade or downgrade instantly. When you switch, we automatically calculate a prorated balance and credit it against your new price.",
+  },
+];
+
+const tabs = [
+  { key: "seekers", label: "For job seekers" },
+  { key: "recruiters", label: "For recruiters" },
+];
+
+export default function PricingPage() {
+  const [activeTab, setActiveTab] = useState("seekers");
+  const currentPlans = plans[activeTab];
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 py-16 px-4 sm:px-6 lg:px-8 text-neutral-900 dark:text-neutral-100">
-      <div className="max-w-6xl mx-auto space-y-12">
-        {/* Page Typography Header */}
-        <div className="text-center space-y-4 max-w-2xl mx-auto">
-          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
-            Flexible Plans for Everyone
+    <div
+      className={`${body.className} min-h-screen bg-slate-50 px-4 py-14 text-slate-900 dark:bg-[#050B1A] dark:text-slate-100 sm:px-6 sm:py-20 lg:px-8`}
+    >
+      <div className="mx-auto max-w-6xl">
+        {/* Header */}
+        <div className="mx-auto max-w-2xl text-center">
+          <h1
+            className={`${display.className} text-balance text-4xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-5xl lg:text-6xl`}
+          >
+            Flexible plans for everyone
           </h1>
-          <p className="text-lg text-neutral-500 dark:text-neutral-400">
+          <p className="mt-4 text-base text-slate-600 dark:text-slate-300 sm:text-lg">
             Choose the perfect fit for your goals. Upgrade, downgrade, or cancel
             any time.
           </p>
         </div>
 
-        {/* Custom Toggle Switch Component */}
-        <div className="flex justify-center">
-          <div className="bg-neutral-200/70 dark:bg-neutral-800 p-1.5 rounded-xl flex items-center gap-1 shadow-inner border border-neutral-300/40 dark:border-neutral-700">
-            <button
-              onClick={() => setActiveTab("seekers")}
-              className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                activeTab === "seekers"
-                  ? "bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm"
-                  : "text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-300"
-              }`}
-            >
-              For Job Seekers
-            </button>
-            <button
-              onClick={() => setActiveTab("recruiters")}
-              className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                activeTab === "recruiters"
-                  ? "bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm"
-                  : "text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-300"
-              }`}
-            >
-              For Recruiters
-            </button>
+        {/* Audience toggle */}
+        <div className="mt-10 flex justify-center">
+          <div
+            role="tablist"
+            aria-label="Pricing audience"
+            className="flex w-full max-w-sm items-center gap-1 rounded-xl border border-slate-200 bg-white p-1.5 dark:border-white/10 dark:bg-white/5 sm:w-auto sm:max-w-none"
+          >
+            {tabs.map((tab) => {
+              const selected = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`flex-1 rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 sm:flex-none sm:px-6 ${
+                    selected
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Responsive Pricing Grid View */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start pt-4">
+        {/* Plans */}
+        <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-3 md:items-stretch lg:gap-8">
           {currentPlans.map((plan) => (
-            <Card
-              key={plan.name}
-              className={`p-1 flex flex-col relative transition-all duration-200 hover:-translate-y-1 hover:shadow-xl ${
+            <article
+              key={plan.id}
+              className={`relative flex flex-col rounded-3xl p-7 transition-shadow sm:p-8 ${
                 plan.popular
-                  ? "border-2 border-blue-500 dark:border-blue-400 shadow-md ring-4 ring-blue-500/10 dark:ring-blue-400/5 md:-translate-y-2 hover:md:-translate-y-3"
-                  : "border border-neutral-200 dark:border-neutral-800 shadow-sm"
+                  ? "bg-blue-600 text-white shadow-xl shadow-blue-600/25 dark:shadow-blue-600/20"
+                  : "border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#0B1530] dark:shadow-none"
               }`}
             >
-              {/* Highlight Badge for Popular/Growth Tiers */}
               {plan.popular && (
-                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1">
-                  <Flame size={12} /> Most Popular
+                <span className="absolute -top-3.5 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-bold text-blue-700 shadow-sm">
+                  <Flame width={12} height={12} aria-hidden="true" />
+                  Most popular
                 </span>
               )}
 
-              <Card.Header className="flex flex-col items-start p-6 pb-4 space-y-2">
-                <span className="text-xs uppercase font-bold tracking-widest text-neutral-400">
-                  {plan.name}
+              <h2
+                className={`${display.className} text-xl font-bold ${
+                  plan.popular ? "text-white" : "text-slate-950 dark:text-white"
+                }`}
+              >
+                {plan.name}
+              </h2>
+
+              <p className="mt-4 flex items-baseline gap-1">
+                <span
+                  className={`${display.className} text-5xl font-extrabold tracking-tight`}
+                >
+                  {plan.price}
                 </span>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold tracking-tight">
-                    {plan.price}
-                  </span>
-                  <span className="text-neutral-400 text-sm font-medium">
-                    /{plan.period}
-                  </span>
-                </div>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed pt-1">
-                  {plan.description}
-                </p>
-              </Card.Header>
+                <span
+                  className={`text-sm font-medium ${
+                    plan.popular
+                      ? "text-blue-100"
+                      : "text-slate-500 dark:text-slate-400"
+                  }`}
+                >
+                  /{plan.period}
+                </span>
+              </p>
 
-              <Card.Content className="p-6 pt-0 flex-grow">
-                <div className="w-full border-t border-neutral-100 dark:border-neutral-800 my-4" />
+              <p
+                className={`mt-3 text-sm leading-relaxed ${
+                  plan.popular
+                    ? "text-blue-100"
+                    : "text-slate-600 dark:text-slate-400"
+                }`}
+              >
+                {plan.description}
+              </p>
 
-                {/* Dynamic Plan Feature Loop */}
-                <ul className="space-y-3.5">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2.5 text-sm">
-                      <div className="p-0.5 rounded-full bg-green-500/10 dark:bg-green-500/20 text-green-600 dark:text-green-400 mt-0.5 shrink-0">
-                        <ShieldCheck size={14} />
-                      </div>
-                      <span className="text-neutral-600 dark:text-neutral-300 leading-normal">
-                        {feature}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </Card.Content>
+              <ul
+                className={`mt-6 flex-grow space-y-3.5 border-t pt-6 ${
+                  plan.popular
+                    ? "border-white/20"
+                    : "border-slate-200 dark:border-white/10"
+                }`}
+              >
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-start gap-3 text-sm">
+                    <span
+                      className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full ${
+                        plan.popular
+                          ? "bg-white/20 text-white"
+                          : "bg-blue-600/10 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400"
+                      }`}
+                    >
+                      <Check width={12} height={12} aria-hidden="true" />
+                    </span>
+                    <span
+                      className={
+                        plan.popular
+                          ? "text-white"
+                          : "text-slate-700 dark:text-slate-300"
+                      }
+                    >
+                      {feature}
+                    </span>
+                  </li>
+                ))}
+              </ul>
 
-              <Card.Footer className="p-6 pt-2">
-                <form action="/api/checkout_sessions" method="POST">
-                  <section>
+              <div className="mt-8">
+                {plan.free ? (
+                  <Link
+                    href="/signup"
+                    className="inline-flex w-full items-center justify-center rounded-xl border border-slate-300 px-5 py-3.5 text-sm font-semibold text-slate-900 transition-colors hover:border-blue-600 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-white/20 dark:text-white dark:hover:border-blue-400 dark:hover:text-blue-300"
+                  >
+                    {plan.cta}
+                  </Link>
+                ) : (
+                  <form action="/api/checkout_sessions" method="POST">
+                    <input type="hidden" name="plan" value={plan.id} />
+                    <input type="hidden" name="audience" value={activeTab} />
                     <button
                       type="submit"
-                      role="link"
-                      className={`font-bold text-sm tracking-wide py-5 rounded-xl transition-all ${
+                      className={`w-full rounded-xl px-5 py-3.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
                         plan.popular
-                          ? "shadow-md shadow-blue-500/20 bg-blue-600 hover:bg-blue-700 text-white"
-                          : ""
+                          ? "bg-white text-blue-700 hover:bg-blue-50 focus-visible:ring-white focus-visible:ring-offset-blue-600"
+                          : "bg-blue-600 text-white hover:bg-blue-500 focus-visible:ring-blue-500 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0B1530]"
                       }`}
                     >
                       {plan.cta}
                     </button>
-                  </section>
-                </form>
-              </Card.Footer>
-            </Card>
+                  </form>
+                )}
+              </div>
+            </article>
           ))}
         </div>
 
-        {/* Divider Separation Break */}
-        <div className="border-t border-neutral-200 dark:border-neutral-800 pt-16 mt-8" />
-
-        {/* FAQ Accordion Component Layer */}
-        <div className="max-w-3xl mx-auto space-y-6">
-          <div className="text-center space-y-2">
-            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-              Frequently Asked Questions
+        {/* FAQ */}
+        <div className="mx-auto mt-20 max-w-3xl border-t border-slate-200 pt-16 dark:border-white/10 sm:mt-24">
+          <div className="text-center">
+            <h2
+              className={`${display.className} text-2xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-3xl`}
+            >
+              Frequently asked questions
             </h2>
-            <p className="text-sm text-neutral-400">
-              Everything you need to know about billing cycles, cancellations,
-              and plans.
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
+              Everything you need to know about billing, cancellations and
+              plans.
             </p>
           </div>
 
-          <Accordion variant="splitted" className="px-0">
-            <AccordionItem
-              key="1"
-              aria-label="How does subscription cancellation work?"
-              title="Can I cancel my subscription anytime?"
-              className="bg-white dark:bg-neutral-800 border border-neutral-200/60 dark:border-neutral-700/50 shadow-xs rounded-xl"
-            >
-              <p className="text-sm text-neutral-500 dark:text-neutral-400 pb-4">
-                Yes, absolutely. You can cancel your subscription inside your
-                billing dashboard panel at any given moment. You will maintain
-                complete access to your plan features until the end of your
-                active billing period.
-              </p>
-            </AccordionItem>
-            <AccordionItem
-              key="2"
-              aria-label="What is your policy regarding refunds?"
-              title="What is your refund policy?"
-              className="bg-white dark:bg-neutral-800 border border-neutral-200/60 dark:border-neutral-700/50 shadow-xs rounded-xl"
-            >
-              <p className="text-sm text-neutral-500 dark:text-neutral-400 pb-4">
-                We offer a 14-day window for complete refunds on initial
-                purchases if you feel the platform didn't add adequate value.
-                Reach out to our billing help desk, and we will handle it
-                immediately.
-              </p>
-            </AccordionItem>
-            <AccordionItem
-              key="3"
-              aria-label="Which payment methods do you support?"
-              title="What payment methods do you support?"
-              className="bg-white dark:bg-neutral-800 border border-neutral-200/60 dark:border-neutral-700/50 shadow-xs rounded-xl"
-            >
-              <p className="text-sm text-neutral-500 dark:text-neutral-400 pb-4">
-                We safely manage checkout operations using Stripe encryption
-                keys. We accept all major networks including Visa, Mastercard,
-                American Express, alongside native configurations for Apple Pay
-                and Google Pay.
-              </p>
-            </AccordionItem>
-            <AccordionItem
-              key="4"
-              aria-label="Can I switch between plans midway through a billing cycle?"
-              title="Can I switch plans midway through the month?"
-              className="bg-white dark:bg-neutral-800 border border-neutral-200/60 dark:border-neutral-700/50 shadow-xs rounded-xl"
-            >
-              <p className="text-sm text-neutral-500 dark:text-neutral-400 pb-4">
-                Yes, you can upgrade or downgrade instantly. When upgrading or
-                switching profiles, our engine automatically calculates a
-                prorated balance, credited cleanly against your adjusted pricing
-                target.
-              </p>
-            </AccordionItem>
-          </Accordion>
+          <div className="mt-8 space-y-3">
+            {faqs.map((item) => (
+              <details
+                key={item.q}
+                className="group rounded-xl border border-slate-200 bg-white px-5 dark:border-white/10 dark:bg-[#0B1530]"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-lg py-4 text-left text-sm font-semibold text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-white sm:text-base [&::-webkit-details-marker]:hidden">
+                  {item.q}
+                  <ChevronDown
+                    width={16}
+                    height={16}
+                    aria-hidden="true"
+                    className="flex-shrink-0 text-blue-600 transition-transform group-open:rotate-180 dark:text-blue-400"
+                  />
+                </summary>
+                <p className="pb-5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                  {item.a}
+                </p>
+              </details>
+            ))}
+          </div>
         </div>
       </div>
     </div>

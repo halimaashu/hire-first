@@ -1,137 +1,246 @@
-
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Card, Input, Button } from "@heroui/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Eye, EyeSlash } from "@gravity-ui/icons";
+import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
 
 import { authClient } from "@/lib/auth-client";
-import { useRouter, useSearchParams } from "next/navigation";
+
+const display = Bricolage_Grotesque({ subsets: ["latin"], display: "swap" });
+const body = Instrument_Sans({ subsets: ["latin"], display: "swap" });
+
+const fieldBase =
+  "w-full h-12 rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 placeholder:text-slate-500 transition-colors focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 dark:border-white/10 dark:bg-[#0B1530] dark:text-white dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-500/30";
 
 function SigninContent() {
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  const videoRef = useRef(null);
 
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/";
-
   const router = useRouter();
+
+  // React doesn't always set `muted` on the DOM element, and browsers block
+  // autoplay for unmuted video. Force it, then start playback.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = true;
+    video.defaultMuted = true;
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        // Autoplay was blocked (e.g. low-power mode); the navy panel stays visible
+      });
+    }
+  }, []);
+
+  // Only allow internal paths, so the redirect can't send people to another site
+  const rawRedirect = searchParams.get("redirect");
+  const redirectTo =
+    rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+      ? rawRedirect
+      : "/";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     setLoading(true);
     setError("");
-    setSuccess("");
 
     const formData = new FormData(e.currentTarget);
-    const userData = Object.fromEntries(formData.entries());
+    const email = formData.get("email");
+    const password = formData.get("password");
 
-    const { email, password } = userData;
+    try {
+      const { data, error } = await authClient.signIn.email({
+        email,
+        password,
+        rememberMe: true,
+      });
 
-    const { data, error } = await authClient.signIn.email({
-      email,
-      password,
-      rememberMe: true,
-    });
-
-    if (data) {
-      router.push(redirectTo);
+      if (error) {
+        setError(error.message || "Something went wrong. Please try again.");
+      } else if (data) {
+        router.push(redirectTo);
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    if (error) {
-      setError(error.message || "Something went wrong");
-    }
-
-    setLoading(false);
   };
 
   return (
-    <section className="min-h-screen bg-black flex items-center justify-center px-4 py-10">
-      <Card className="w-full max-w-md border border-white/10 bg-zinc-950">
-        <div className="p-8">
+    <section
+      className={`${body.className} grid min-h-screen bg-white text-slate-900 dark:bg-[#050B1A] dark:text-slate-100 lg:grid-cols-2`}
+    >
+      {/* Left: video panel (desktop only) */}
+      <div className="relative hidden overflow-hidden bg-[#050B1A] lg:block">
+      <video
+  ref={videoRef}
+  autoPlay
+  muted
+  loop
+  playsInline
+  preload="auto"
+  aria-hidden="true"
+  className="absolute inset-0 h-full w-full object-cover"
+  onLoadedData={() => console.log("VIDEO: loaded")}
+  onPlaying={() => console.log("VIDEO: playing")}
+  onError={(e) =>
+    console.log("VIDEO ERROR:", e.currentTarget.error?.code, e.currentTarget.error?.message)
+  }
+  src="/video/bg-video.mp4"
+/>
 
-          {/* Header */}
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-white">
-              Welcome Back
-            </h1>
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-gradient-to-b from-[#050B1A]/80 via-blue-950/50 to-[#050B1A]/90"
+        />
 
-            <p className="mt-2 text-gray-400">
-              Sign in to your HireLoop account
+        <div className="relative z-10 flex h-full flex-col justify-between p-12 xl:p-16">
+          <Link
+            href="/"
+            className={`${display.className} w-fit rounded-md text-2xl font-extrabold tracking-tight text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white`}
+          >
+            HireLoop
+          </Link>
+
+          <div className="max-w-md">
+            <p
+              className={`${display.className} text-balance text-4xl font-extrabold leading-[1.1] tracking-tight text-white xl:text-5xl`}
+            >
+              Your next role is already looking for you.
+            </p>
+            <p className="mt-4 text-base leading-relaxed text-slate-200 xl:text-lg">
+              Sign in to pick up where you left off. Your matches are waiting.
             </p>
           </div>
+        </div>
+      </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Right: sign-in form */}
+      <div className="flex flex-col justify-center px-4 py-10 sm:px-8 lg:px-12 xl:px-20">
+        <div className="mx-auto w-full max-w-sm">
+          {/* Brand shown on mobile, where the video panel is hidden */}
+          <Link
+            href="/"
+            className={`${display.className} mb-10 inline-block rounded-md text-2xl font-extrabold tracking-tight text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-blue-400 lg:hidden`}
+          >
+            HireLoop
+          </Link>
 
-            <Input
-              className="text-white placeholder:text-gray-500 w-full"
-              name="email"
-              type="email"
-              label="Email"
-              placeholder="john@example.com"
-              variant="bordered"
-              required
-            />
+          <h1
+            className={`${display.className} text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-4xl`}
+          >
+            Welcome back
+          </h1>
+          <p className="mt-2 text-base text-slate-600 dark:text-slate-400">
+            Sign in to your HireLoop account.
+          </p>
 
-            <Input
-              className="text-white placeholder:text-gray-500 w-full"
-              name="password"
-              type="password"
-              label="Password"
-              placeholder="Enter password"
-              variant="bordered"
-              required
-            />
+          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+            <div>
+              <label
+                htmlFor="email"
+                className="mb-1.5 block text-sm font-semibold text-slate-800 dark:text-slate-200"
+              >
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="john@example.com"
+                required
+                className={fieldBase}
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="password"
+                className="mb-1.5 block text-sm font-semibold text-slate-800 dark:text-slate-200"
+              >
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  placeholder="Enter your password"
+                  required
+                  className={`${fieldBase} pr-12`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-500 transition-colors hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-slate-400 dark:hover:text-white"
+                >
+                  {showPassword ? (
+                    <EyeSlash width={18} height={18} aria-hidden="true" />
+                  ) : (
+                    <Eye width={18} height={18} aria-hidden="true" />
+                  )}
+                </button>
+              </div>
+            </div>
 
             {error && (
-              <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
+              <div
+                role="alert"
+                className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
+              >
                 {error}
               </div>
             )}
 
-            {success && (
-              <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-3 text-sm text-green-400">
-                {success}
-              </div>
-            )}
-
-            <Button
+            <button
               type="submit"
-              color="primary"
-              className="w-full"
-              isLoading={loading}
+              disabled={loading}
+              className="h-12 w-full rounded-xl bg-blue-600 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-colors hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-70 dark:shadow-none dark:focus-visible:ring-offset-[#050B1A]"
             >
-              Sign In
-            </Button>
-
+              {loading ? "Signing in…" : "Sign in"}
+            </button>
           </form>
 
-          {/* Footer */}
-          <p className="mt-6 text-center text-sm text-gray-400">
+          <p className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">
             Don’t have an account?{" "}
-
             <Link
-              href={`/signup?redirect=${redirectTo}`}
-              className="text-violet-500 hover:underline"
+              href={`/signup?redirect=${encodeURIComponent(redirectTo)}`}
+              className="rounded-md font-semibold text-blue-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-blue-400"
             >
-              Sign Up
+              Sign up
             </Link>
           </p>
-
         </div>
-      </Card>
+      </div>
     </section>
   );
 }
 
 export default function SigninPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div
+          className={`${body.className} flex min-h-screen items-center justify-center bg-white text-slate-600 dark:bg-[#050B1A] dark:text-slate-400`}
+        >
+          Loading…
+        </div>
+      }
+    >
       <SigninContent />
     </Suspense>
   );
 }
-

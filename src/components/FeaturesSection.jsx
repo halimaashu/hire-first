@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Magnifier,
   BarsAscendingAlignLeft,
@@ -8,97 +7,87 @@ import {
   Circle,
   FolderTree,
   LayoutCells,
-} from '@gravity-ui/icons';
+} from "@gravity-ui/icons";
+import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
+
+const display = Bricolage_Grotesque({ subsets: ["latin"], display: "swap" });
+const body = Instrument_Sans({ subsets: ["latin"], display: "swap" });
 
 const features = [
   {
     icon: Magnifier,
-    title: 'Smart Search',
-    description: 'Find your ideal job with advanced filters.',
+    title: "Smart search",
+    description: "Find your ideal job with advanced filters.",
   },
   {
     icon: BarsAscendingAlignLeft,
-    title: 'Top Companies',
-    description: 'Apply to vetted companies that are hiring.',
+    title: "Top companies",
+    description: "Apply to vetted companies that are hiring.",
   },
   {
     icon: Bookmark,
-    title: 'Saved Jobs',
-    description: 'Manage apps & favorites on your dashboard.',
+    title: "Saved jobs",
+    description: "Manage applications and favorites on your dashboard.",
   },
   {
     icon: ChartLine,
-    title: 'Salary Insights',
-    description: 'Get real salary data to negotiate confidently.',
+    title: "Salary insights",
+    description: "Get real salary data to negotiate confidently.",
   },
   {
     icon: LayoutHeaderCursor,
-    title: 'One-Click ',
-    description: 'Simplify your job applications for an easier process.',
+    title: "One-click apply",
+    description: "Simplify your job applications for an easier process.",
   },
   {
     icon: Circle,
-    title: 'Skill-Based Matching',
-    description: 'Discover jobs that match your skills and experience.',
+    title: "Skill-based matching",
+    description: "Discover jobs that match your skills and experience.",
   },
   {
     icon: FolderTree,
-    title: 'Career Growth Resources',
-    description: 'Boost your career with quick interview tips.',
+    title: "Career growth resources",
+    description: "Boost your career with quick interview tips.",
   },
   {
     icon: LayoutCells,
-    title: 'Resume Builder',
-    description: 'Create professional resumes with modern templates.',
+    title: "Resume builder",
+    description: "Create professional resumes with modern templates.",
   },
 ];
 
 export default function FeaturesSection() {
   return (
-    <section className="bg-[#0b0b0d] text-white py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto text-center">
-        {/* Top Tagline */}
-        <div className="flex items-center justify-center space-x-2 mb-4">
-          <span className="h-1.5 w-1.5 rounded-full bg-indigo-500"></span>
-          <span className="text-xs font-semibold tracking-widest text-indigo-400 uppercase">
-            FEATURES JOB
-          </span>
-          <span className="h-1.5 w-1.5 rounded-full bg-indigo-500"></span>
-        </div>
-
-        {/* Main Heading */}
-        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-14 text-gray-100">
-          Everything you need <br className="hidden sm:inline" />
-          to succeed
+    <section
+      className={`${body.className} bg-slate-50 px-4 py-14 text-slate-900 dark:bg-[#050B1A] dark:text-slate-100 sm:px-6 sm:py-20 lg:px-8`}
+    >
+      <div className="mx-auto max-w-6xl">
+        <h2
+          className={`${display.className} mx-auto mb-10 max-w-2xl text-balance text-center text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:mb-14 sm:text-4xl lg:text-5xl`}
+        >
+          Everything you need to succeed
         </h2>
 
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
-          {features.map((feature, index) => {
-            const IconComponent = feature.icon;
-            return (
-              <div
-                key={index}
-                className="flex items-start space-x-4 p-2 rounded-xl transition duration-200 hover:bg-zinc-900/50"
-              >
-                {/* Icon Box */}
-                <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-xl bg-[#141417] border border-zinc-800/80 text-purple-400 shadow-sm">
-                  <IconComponent width={20} height={20} />
-                </div>
+        <ul className="grid grid-cols-1 gap-x-8 gap-y-10 text-left sm:grid-cols-2 lg:grid-cols-4">
+          {features.map(({ icon: Icon, title, description }) => (
+            <li key={title} className="flex items-start gap-4">
+              <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-md shadow-blue-600/20 dark:bg-blue-500/15 dark:text-blue-400 dark:shadow-none dark:ring-1 dark:ring-blue-500/30">
+                <Icon width={22} height={22} aria-hidden="true" />
+              </span>
 
-                {/* Content */}
-                <div className="pt-0.5">
-                  <h3 className="text-sm font-semibold text-gray-200 mb-1">
-                    {feature.title}
-                  </h3>
-                  <p className="text-xs text-gray-400 leading-relaxed">
-                    {feature.description}
-                  </p>
-                </div>
+              <div>
+                <h3
+                  className={`${display.className} text-base font-bold text-slate-950 dark:text-white`}
+                >
+                  {title}
+                </h3>
+                <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                  {description}
+                </p>
               </div>
-            );
-          })}
-        </div>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
