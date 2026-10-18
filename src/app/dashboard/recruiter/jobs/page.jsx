@@ -6,7 +6,8 @@ import { Button } from "@heroui/react";
 
 const AllJobPage = async () => {
   const company=await getLoggedInRecruiterCompany()
-  // console.log(company._id)
+  console.log(company._id,"from recruiter jobs pages")
+  // http://localhost:5000/api/jobs    this is the link for all jobs but i need the justify a comopany jobs for this positions
   const jobs = await getJobs({
     companyId:company._id,
     status: "active",

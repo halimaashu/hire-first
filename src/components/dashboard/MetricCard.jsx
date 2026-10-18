@@ -1,29 +1,39 @@
-// components/MetricCard.jsx
-import React from 'react';
-import { Card } from "@heroui/react";
+import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
 
-export default function MetricCard({ title, value, icon: Icon }) {
+const display = Bricolage_Grotesque({ subsets: ["latin"], display: "swap" });
+const body = Instrument_Sans({ subsets: ["latin"], display: "swap" });
+
+/**
+ * MetricCard
+ * <MetricCard title="Total Job Posts" value="48" icon={FileText} />
+ * `hint` is optional small text under the value.
+ */
+export default function MetricCard({ title, value, icon: Icon, hint }) {
   return (
-    <Card 
-      className="bg-[#121214] border border-[#1e1e22] shadow-sm hover:border-[#2a2a30] transition-colors duration-200"
-      variant="default" 
+    <div
+      className={`${body.className} flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#0B1530] dark:shadow-none sm:p-6`}
     >
-      <Card.Content className="p-5 flex flex-col justify-between min-h-[140px]">
-        {/* Gravity UI Icon Box */}
-        <div className="bg-[#1a1a1e] text-zinc-400 p-2.5 rounded-lg w-fit flex items-center justify-center border border-[#26262b]">
-          {Icon && <Icon size={18} className="text-zinc-300" />}
-        </div>
-        
-        {/* Metric Labels & Numbers */}
-        <div className="mt-4 space-y-1">
-          <p className="text-xs font-medium text-zinc-500 tracking-wide uppercase">
-            {title}
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+          {title}
+        </p>
+        <p
+          className={`${display.className} mt-2 text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-4xl`}
+        >
+          {value}
+        </p>
+        {hint && (
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            {hint}
           </p>
-          <p className="text-2xl font-bold text-zinc-100 tracking-tight">
-            {value}
-          </p>
-        </div>
-      </Card.Content>
-    </Card>
+        )}
+      </div>
+
+      {Icon && (
+        <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-blue-600/10 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">
+          <Icon width={22} height={22} aria-hidden="true" />
+        </span>
+      )}
+    </div>
   );
 }

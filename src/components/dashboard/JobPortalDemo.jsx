@@ -1,60 +1,83 @@
-// app/dashboard/page.jsx (or wherever your route sits)
-import React from 'react';
-import { Button } from "@heroui/react";
+import Link from "next/link";
+import {
+  FileText,
+  Persons,
+  Thunderbolt,
+  CircleCheck,
+  FolderPlus,
+  Magnifier,
+  Person,
+  Envelope,
+} from "@gravity-ui/icons";
+import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
 
-// Import your custom reusable components
+import MetricCard from "./MetricCard";
 
+const display = Bricolage_Grotesque({ subsets: ["latin"], display: "swap" });
+const body = Instrument_Sans({ subsets: ["latin"], display: "swap" });
 
+// SAMPLE DATA: replace these numbers with real values from your API
+const recruiterStatsData = [
+  { id: "job-posts", title: "Total job posts", value: "48", icon: FileText },
+  { id: "applicants", title: "Total applicants", value: "1,284", icon: Persons },
+  { id: "active", title: "Active jobs", value: "18", icon: Thunderbolt },
+  { id: "closed", title: "Jobs closed", value: "32", icon: CircleCheck },
+];
 
-// Import Gravity UI Icons for the feed mapping
-import { FileText, Persons, Thunderbolt, CircleCheck } from '@gravity-ui/icons';
-import MetricCard from './MetricCard';
-import SplitFeatureSection from './SplitFeatureSection';
+const quickActions = [
+  { label: "Post a job", href: "/dashboard/recruiter/jobs/new", icon: FolderPlus },
+  { label: "Manage jobs", href: "/dashboard/recruiter/jobs", icon: Magnifier },
+  { label: "Company profile", href: "/dashboard/recruiter/company", icon: Person },
+  { label: "Messages", href: "/dashboard/recruiter/messages", icon: Envelope },
+];
 
 export default function JobPortalDemo() {
-  // Analytical statistics dataset configuration
-  const recruiterStatsData = [
-    { id: 'job-posts', title: 'Total Job Posts', value: '48', icon: FileText },
-    { id: 'applicants', title: 'Total Applicants', value: '1,284', icon: Persons },
-    { id: 'active', title: 'Active Jobs', value: '18', icon: Thunderbolt },
-    { id: 'closed', title: 'Jobs Closed', value: '32', icon: CircleCheck },
-  ];
-
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 p-6 md:p-12 font-sans">
-      <div className="max-w-7xl mx-auto space-y-10">
-        
-        {/* Workspace Portal Header */}
-        <div className="border-b border-[#1e1e22] pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Main Hub Interface</h1>
-            <p className="text-sm text-zinc-500 mt-0.5">Unified dashboard configuration for Recruiter and Seeker elements.</p>
-          </div>
-          <Button radius="md" variant="bordered" className="text-zinc-300 border-[#1e1e22] hover:bg-[#121214]">
-            Settings Configuration
-          </Button>
+    <div className={`${body.className} space-y-10`}>
+      {/* Metrics */}
+      <section aria-labelledby="overview-heading">
+        <h2
+          id="overview-heading"
+          className={`${display.className} mb-4 text-xl font-bold text-slate-950 dark:text-white`}
+        >
+          Overview
+        </h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {recruiterStatsData.map((stat) => (
+            <MetricCard
+              key={stat.id}
+              title={stat.title}
+              value={stat.value}
+              icon={stat.icon}
+            />
+          ))}
         </div>
+      </section>
 
-        {/* 1.MAIN     METRICS GRID SECTION */}
-        <div className="space-y-4">
-          <h2 className="text-xs font-bold text-zinc-400 tracking-wider uppercase">Live Analytics Feed</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-            {recruiterStatsData.map((stat) => (
-              <MetricCard
-                key={stat.id}
-                title={stat.title}
-                value={stat.value}
-                icon={stat.icon}
-              />
-            ))}
-          </div>
-        </div>
-
-        <hr className="border-[#1e1e22]" />
-
-       
-
-      </div>
+      {/* Quick actions */}
+      <section aria-labelledby="actions-heading">
+        <h2
+          id="actions-heading"
+          className={`${display.className} mb-4 text-xl font-bold text-slate-950 dark:text-white`}
+        >
+          Quick actions
+        </h2>
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {quickActions.map(({ label, href, icon: Icon }) => (
+            <li key={href}>
+              <Link
+                href={href}
+                className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm font-semibold text-slate-900 shadow-sm transition-colors hover:border-blue-600 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-white/10 dark:bg-[#0B1530] dark:text-white dark:shadow-none dark:hover:border-blue-400 dark:hover:text-blue-300"
+              >
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-600/10 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">
+                  <Icon width={20} height={20} aria-hidden="true" />
+                </span>
+                {label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }

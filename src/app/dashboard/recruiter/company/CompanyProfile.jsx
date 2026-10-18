@@ -1,112 +1,233 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  Button,
-  Input,
-  Select,
-  ListBox,
-  Card,
-  Avatar,
-  Chip,
-  Spinner,
-} from "@heroui/react";
-import {
-  Building2,
-  Globe,
-  MapPin,
-  Upload,
-  Edit3,
-  ExternalLink,
-  Users,
-} from "lucide-react";
-import Link from "next/link";
+import { useState } from "react";
+import { Building2, MapPin, Upload, Edit3, ExternalLink, Users } from "lucide-react";
+import { ChevronDown } from "@gravity-ui/icons";
+import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
+import toast from "react-hot-toast";
+
 import { registerCompany } from "@/lib/actions/company";
+
+const display = Bricolage_Grotesque({ subsets: ["latin"], display: "swap" });
+const body = Instrument_Sans({ subsets: ["latin"], display: "swap" });
 
 const INDUSTRIES = [
   { id: "technology", name: "Technology" },
   { id: "finance", name: "Finance & Banking" },
   { id: "healthcare", name: "Healthcare" },
+  { id: "education", name: "Education" },
+  { id: "retail", name: "Retail & E-commerce" },
+  { id: "manufacturing", name: "Manufacturing" },
+  { id: "media", name: "Media & Marketing" },
+  { id: "other", name: "Other" },
 ];
 
 const EMPLOYEE_RANGES = [
   { id: "1-10", name: "1-10 employees" },
   { id: "11-50", name: "11-50 employees" },
   { id: "51-200", name: "51-200 employees" },
+  { id: "201-500", name: "201-500 employees" },
+  { id: "500+", name: "500+ employees" },
 ];
 
-export default function CompanyProfile({recruiter,recruiterCompany}) {
-  const [company, setCompany] = useState(recruiterCompany);
+const MAX_LOGO_SIZE = 5 * 1024 * 1024; // 5 MB
+
+const fieldBase =
+  "w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 placeholder:text-slate-500 transition-colors focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 dark:border-white/10 dark:bg-[#0B1530] dark:text-white dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-500/30";
+
+const labelClass =
+  "mb-1.5 block text-sm font-semibold text-slate-800 dark:text-slate-200";
+
+const primaryBtn =
+  "inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-semibold text-white shadow-md shadow-blue-600/20 transition-colors hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-70 dark:shadow-none dark:focus-visible:ring-offset-[#050B1A]";
+
+const outlineBtn =
+  "inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-300 px-5 text-sm font-semibold text-slate-900 transition-colors hover:border-blue-600 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-white/20 dark:text-white dark:hover:border-blue-400 dark:hover:text-blue-300";
+
+const STATUS_STYLES = {
+  Approved:
+    "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300",
+  Rejected:
+    "border-rose-300 bg-rose-50 text-rose-800 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300",
+  Pending:
+    "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300",
+};
+
+function FieldError({ id, message }) {
+  if (!message) return null;
+  return (
+    <p id={id} role="alert" className="mt-1.5 text-xs text-rose-700 dark:text-rose-400">
+      {message}
+    </p>
+  );
+}
+
+function CompanyLogo({ src, name, size = "h-16 w-16" }) {
+  const [failed, setFailed] = useState(false);
+
+  return (
+    <span
+      className={`${size} flex flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5`}
+    >
+      {src && !failed ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt={`${name} logo`}
+          className="h-full w-full object-cover"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <span
+          className={`${display.className} text-xl font-bold text-blue-600 dark:text-blue-400`}
+        >
+          {name?.[0]?.toUpperCase() ?? "?"}
+        </span>
+      )}
+    </span>
+  );
+}
+
+function SelectField({ id, name, label, options, placeholder, defaultValue, error }) {
+  return (
+    <div>
+      <label htmlFor={id} className={labelClass}>
+        {label}
+      </label>
+      <div className="relative">
+        <select
+          id={id}
+          name={name}
+          required
+          defaultValue={defaultValue ?? ""}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? `${id}-error` : undefined}
+          className={`${fieldBase} h-12 cursor-pointer appearance-none pr-10`}
+        >
+          <option value="" disabled>
+            {placeholder}
+          </option>
+          {options.map((opt) => (
+            <option key={opt.id} value={opt.id}>
+              {opt.name}
+            </option>
+          ))}
+        </select>
+        <ChevronDown
+          width={16}
+          height={16}
+          aria-hidden="true"
+          className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400"
+        />
+      </div>
+      <FieldError id={`${id}-error`} message={error} />
+    </div>
+  );
+}
+
+export default function CompanyProfile({ recruiter, recruiterCompany }) {
+  const [company, setCompany] = useState(recruiterCompany ?? null);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const [industry, setIndustry] = useState(null);
-  const [employeeRange, setEmployeeRange] = useState(null);
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState("");
   const [errors, setErrors] = useState({});
+  const [formError, setFormError] = useState("");
+  const [descriptionLength, setDescriptionLength] = useState(0);
+
+  // True when a saved company exists (works even if the server did not return an _id)
+  const hasCompany = Boolean(company && (company._id || company.companyName));
+
+  const revokePreview = (url) => {
+    if (url && url.startsWith("blob:")) URL.revokeObjectURL(url);
+  };
 
   const startEditing = () => {
-  console.log(company, "from company page");
-
-  if (company) {
-    setIndustry(company.industry);
-    setEmployeeRange(company.employeeRange);
-    setLogoPreview(company.logoUrl || "");
+    revokePreview(logoPreview);
     setLogoFile(null);
-  }
+    setLogoPreview(hasCompany ? company.logoUrl || "" : "");
+    setErrors({});
+    setFormError("");
+    setDescriptionLength(hasCompany ? (company.description || "").length : 0);
+    setIsEditing(true);
+  };
 
-  setIsEditing(true);
-};
-  const handleFileChange =async (e) => {
+  const cancelEditing = () => {
+    revokePreview(logoPreview);
+    setIsEditing(false);
+    setErrors({});
+    setFormError("");
+  };
+
+  const handleFileChange = (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setLogoFile(file);
-      setLogoPreview(URL.createObjectURL(file));
+    if (!file) return;
+
+    if (!["image/png", "image/jpeg"].includes(file.type)) {
+      setErrors((prev) => ({ ...prev, logo: "Please choose a PNG or JPG image." }));
+      return;
     }
+    if (file.size > MAX_LOGO_SIZE) {
+      setErrors((prev) => ({ ...prev, logo: "The image must be 5 MB or smaller." }));
+      return;
+    }
+
+    revokePreview(logoPreview);
+    setErrors((prev) => ({ ...prev, logo: undefined }));
+    setLogoFile(file);
+    setLogoPreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setErrors({});
+    setFormError("");
 
     const formData = new FormData(e.currentTarget);
-    const companyName = formData.get("companyName");
-    const websiteUrl = formData.get("websiteUrl");
-    const location = formData.get("location");
-    const description = formData.get("description");
+    const companyName = String(formData.get("companyName") || "").trim();
+    const industry = formData.get("industry");
+    const websiteUrl = String(formData.get("websiteUrl") || "").trim();
+    const location = String(formData.get("location") || "").trim();
+    const employeeRange = formData.get("employeeRange");
+    const description = String(formData.get("description") || "").trim();
 
-    let currentErrors = {};
-    if (!companyName) currentErrors.companyName = "Required";
-    if (!industry) currentErrors.industry = "Required";
-    if (!websiteUrl) currentErrors.websiteUrl = "Required";
-    if (!location) currentErrors.location = "Required";
-    if (!employeeRange) currentErrors.employeeRange = "Required";
-    if (!description || description.length < 50)
-      currentErrors.description = "Min 50 characters required";
+    const currentErrors = {};
+    if (!companyName) currentErrors.companyName = "Company name is required.";
+    if (!industry) currentErrors.industry = "Choose an industry.";
+    if (!websiteUrl) currentErrors.websiteUrl = "Website URL is required.";
+    if (!location) currentErrors.location = "Location is required.";
+    if (!employeeRange) currentErrors.employeeRange = "Choose a team size.";
+    if (description.length < 50)
+      currentErrors.description = "Please write at least 50 characters.";
+    if (errors.logo) currentErrors.logo = errors.logo;
 
     if (Object.keys(currentErrors).length > 0) {
       setErrors(currentErrors);
-      setLoading(false);
       return;
     }
 
+    setErrors({});
+    setLoading(true);
+
     try {
-      let imgbbUrl ;
+      // Keep the current logo unless a new one was chosen
+      let logoUrl = hasCompany ? company.logoUrl || "" : "";
+
       if (logoFile) {
         const imgFormData = new FormData();
         imgFormData.append("image", logoFile);
 
         const imgbbRes = await fetch(
           `https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMAGEBB_API_KEY}`,
-          {
-            method: "POST",
-            body: imgFormData,
-          },
+          { method: "POST", body: imgFormData }
         );
         const imgbbData = await imgbbRes.json();
-        imgbbUrl = imgbbData?.data?.display_url || imgbbData?.data?.url || "";
+        const uploadedUrl = imgbbData?.data?.display_url || imgbbData?.data?.url;
+
+        if (!imgbbRes.ok || !uploadedUrl) {
+          throw new Error("The logo could not be uploaded. Please try again.");
+        }
+        logoUrl = uploadedUrl;
       }
 
       const payload = {
@@ -116,369 +237,330 @@ export default function CompanyProfile({recruiter,recruiterCompany}) {
         location,
         employeeRange,
         description,
-        logoUrl: imgbbUrl,
+        logoUrl,
         status: "Pending",
         recruiterId: recruiter?.id || null,
       };
-      console.log(payload, "Company profile submitted successfully");
 
-      setCompany(payload);
-      const response= await registerCompany(payload);
-      
+      // Save first, then update the screen with what the server returned
+      const result = await registerCompany(payload);
 
+      if (result?.error || result?.success === false) {
+        throw new Error(
+          result?.message || result?.error || "Could not save the company."
+        );
+      }
+
+      const saved = result?.company ?? result?.data ?? (result?._id ? result : null);
+      setCompany(saved ? { ...payload, ...saved } : { ...company, ...payload });
+
+      toast.success("Company profile saved");
       setIsEditing(false);
     } catch (err) {
-      console.error("Submission failure", err);
+      setFormError(
+        err?.message || "Something went wrong. Please try again."
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  const industryName =
+    INDUSTRIES.find((i) => i.id === company?.industry)?.name || company?.industry;
+  const rangeName =
+    EMPLOYEE_RANGES.find((r) => r.id === company?.employeeRange)?.name ||
+    company?.employeeRange;
+
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6 text-white">
-      {/* ── HEADER REGION ──────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
+    <div className={`${body.className} mx-auto max-w-3xl space-y-6`}>
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold">My Company</h1>
-          <p className="text-xs text-neutral-400 mt-0.5">
+          <h1
+            className={`${display.className} text-balance text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-4xl`}
+          >
+            My company
+          </h1>
+          <p className="mt-2 text-base text-slate-600 dark:text-slate-400">
             Manage your organization details and status.
           </p>
         </div>
-        {company && !isEditing && (
-          <div className="flex items-center gap-2">
-            <Chip
-              variant="outline"
-              className={
-                company.status === "Approved"
-                  ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
-                  : company.status === "Rejected"
-                    ? "text-rose-400 border-rose-500/30 bg-rose-500/10"
-                    : "text-amber-400 border-amber-500/30 bg-amber-500/10"
-              }
+
+        {hasCompany && !isEditing && (
+          <div className="flex items-center gap-3">
+            <span
+              className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${
+                STATUS_STYLES[company.status] ?? STATUS_STYLES.Pending
+              }`}
             >
-              {company.status}
-            </Chip>
-            <Button
-              size="sm"
-              variant="secondary"
-              onPress={startEditing}
-              className="flex items-center gap-1"
-            >
-              <Edit3 className="w-3.5 h-3.5" /> Edit
-            </Button>
+              {company.status || "Pending"}
+            </span>
+            <button type="button" onClick={startEditing} className={outlineBtn}>
+              <Edit3 className="h-4 w-4" aria-hidden="true" />
+              Edit
+            </button>
           </div>
         )}
       </div>
 
-      {/* ── EMPTY PROMPT STATE ─────────────────────────────────────────── */}
-      {!company._id && !isEditing && (
-        <Card className="p-8 text-center bg-[#0f0f11] border border-neutral-800 space-y-4">
-          <div className="w-12 h-12 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center mx-auto">
-            <Building2 className="w-6 h-6 text-neutral-500" />
-          </div>
-          <div className="space-y-1">
-            <h3 className="font-semibold text-sm">No Company Registered</h3>
-            <p className="text-xs text-neutral-400 max-w-xs mx-auto">
-              You need to register your company profile first to publish hiring
-              posts publicly on the network.
-            </p>
-          </div>
-          <Button
-            variant="primary"
-            onPress={() => setIsEditing(true)}
-            className="bg-violet-600 hover:bg-violet-500 text-xs font-semibold px-6"
+      {/* Empty state */}
+      {!hasCompany && !isEditing && (
+        <div className="rounded-2xl border border-dashed border-slate-300 px-6 py-12 text-center dark:border-white/15 sm:px-10 sm:py-16">
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-600/10 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">
+            <Building2 className="h-6 w-6" aria-hidden="true" />
+          </span>
+          <h2
+            className={`${display.className} mt-5 text-xl font-bold text-slate-950 dark:text-white`}
           >
-            Register Company
-          </Button>
-        </Card>
+            No company registered
+          </h2>
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+            Register your company profile first, so you can publish job posts.
+          </p>
+          <button type="button" onClick={startEditing} className={`${primaryBtn} mt-6`}>
+            Register company
+          </button>
+        </div>
       )}
 
-      {/* ── FORM MODE STATE ────────────────────────────────────────────── */}
+      {/* Form */}
       {isEditing && (
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 bg-[#0f0f11] border border-neutral-800 p-6 rounded-xl"
+          noValidate
+          className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#0B1530] dark:shadow-none sm:p-7"
         >
-          <h2 className="text-sm font-bold uppercase tracking-wider text-neutral-400 mb-2">
-            {company ? "Update Business Profile" : "Register New Company"}
+          <h2
+            className={`${display.className} text-lg font-bold text-slate-950 dark:text-white`}
+          >
+            {hasCompany ? "Update business profile" : "Register new company"}
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <span
-                id="lbl-name"
-                className="text-xs font-medium text-neutral-300"
-              >
-                Company Name
-              </span>
-              <Input
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label htmlFor="companyName" className={labelClass}>
+                Company name
+              </label>
+              <input
+                id="companyName"
                 name="companyName"
-                defaultValue={company?.companyName || ""}
-                placeholder="e.g. Acme Corp"
-                variant="secondary"
-                aria-labelledby="lbl-name"
+                type="text"
+                autoComplete="organization"
+                defaultValue={hasCompany ? company.companyName || "" : ""}
+                placeholder="Acme Corp"
+                aria-invalid={Boolean(errors.companyName)}
+                aria-describedby={errors.companyName ? "companyName-error" : undefined}
+                className={`${fieldBase} h-12`}
               />
-              {errors.companyName && (
-                <span className="text-xs text-rose-400">
-                  {errors.companyName}
-                </span>
-              )}
+              <FieldError id="companyName-error" message={errors.companyName} />
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <span
-                id="lbl-industry"
-                className="text-xs font-medium text-neutral-300"
-              >
-                Industry / Category
-              </span>
-              <Select
-                value={industry}
-                onChange={setIndustry}
-                placeholder="Select Industry"
-                className="w-full"
-                aria-labelledby="lbl-industry"
-              >
-                <Select.Trigger className="rounded-lg border bg-[#0f0f11] border-neutral-800 px-3 py-2 text-sm text-left flex justify-between items-center h-10">
-                  <Select.Value>
-                    {INDUSTRIES.find((i) => i.id === industry)?.name ||
-                      "Select Industry"}
-                  </Select.Value>
-                  <Select.Indicator />
-                </Select.Trigger>
-                <Select.Popover className="bg-[#0f0f11] border border-neutral-800 rounded-lg shadow-xl p-1 min-w-[200px]">
-                  <ListBox aria-labelledby="lbl-industry">
-                    {INDUSTRIES.map((item) => (
-                      <ListBox.Item
-                        id={item.id}
-                        key={item.id}
-                        textValue={item.name}
-                        className="px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800 rounded cursor-pointer transition"
-                      >
-                        {item.name}
-                      </ListBox.Item>
-                    ))}
-                  </ListBox>
-                </Select.Popover>
-              </Select>
-              {errors.industry && (
-                <span className="text-xs text-rose-400">{errors.industry}</span>
-              )}
-            </div>
+            <SelectField
+              id="industry"
+              name="industry"
+              label="Industry"
+              placeholder="Select an industry"
+              options={INDUSTRIES}
+              defaultValue={hasCompany ? company.industry : ""}
+              error={errors.industry}
+            />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <span
-                id="lbl-web"
-                className="text-xs font-medium text-neutral-300"
-              >
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label htmlFor="websiteUrl" className={labelClass}>
                 Website URL
-              </span>
-              <Input
+              </label>
+              <input
+                id="websiteUrl"
                 name="websiteUrl"
                 type="url"
-                defaultValue={company?.websiteUrl || ""}
+                autoComplete="url"
+                defaultValue={hasCompany ? company.websiteUrl || "" : ""}
                 placeholder="https://company.com"
-                variant="secondary"
-                aria-labelledby="lbl-web"
+                aria-invalid={Boolean(errors.websiteUrl)}
+                aria-describedby={errors.websiteUrl ? "websiteUrl-error" : undefined}
+                className={`${fieldBase} h-12`}
               />
-              {errors.websiteUrl && (
-                <span className="text-xs text-rose-400">
-                  {errors.websiteUrl}
-                </span>
-              )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <span
-                id="lbl-location"
-                className="text-xs font-medium text-neutral-300"
-              >
-                Location
-              </span>
-              <Input
-                name="location"
-                defaultValue={company?.location || ""}
-                placeholder="City, Country"
-                variant="secondary"
-                aria-labelledby="lbl-location"
-              />
-              {errors.location && (
-                <span className="text-xs text-rose-400">{errors.location}</span>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
-            <div className="flex flex-col gap-1.5">
-              <span
-                id="lbl-range"
-                className="text-xs font-medium text-neutral-300"
-              >
-                Employee Count Range
-              </span>
-              <Select
-                value={employeeRange}
-                onChange={setEmployeeRange}
-                placeholder="Select Range"
-                className="w-full"
-                aria-labelledby="lbl-range"
-              >
-                <Select.Trigger className="rounded-lg border bg-[#0f0f11] border-neutral-800 px-3 py-2 text-sm text-left flex justify-between items-center h-10">
-                  <Select.Value>
-                    {EMPLOYEE_RANGES.find((r) => r.id === employeeRange)
-                      ?.name || "Select Range"}
-                  </Select.Value>
-                  <Select.Indicator />
-                </Select.Trigger>
-                <Select.Popover className="bg-[#0f0f11] border border-neutral-800 rounded-lg shadow-xl p-1 min-w-[200px]">
-                  <ListBox aria-labelledby="lbl-range">
-                    {EMPLOYEE_RANGES.map((range) => (
-                      <ListBox.Item
-                        id={range.id}
-                        key={range.id}
-                        textValue={range.name}
-                        className="px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800 rounded cursor-pointer transition"
-                      >
-                        {range.name}
-                      </ListBox.Item>
-                    ))}
-                  </ListBox>
-                </Select.Popover>
-              </Select>
-              {errors.employeeRange && (
-                <span className="text-xs text-rose-400">
-                  {errors.employeeRange}
-                </span>
-              )}
+              <FieldError id="websiteUrl-error" message={errors.websiteUrl} />
             </div>
 
             <div>
-              <label className="flex items-center gap-3 bg-neutral-900 border border-dashed border-neutral-800 rounded-lg px-4 h-10 cursor-pointer hover:border-neutral-700 transition">
-                <Upload className="w-4 h-4 text-neutral-500" />
-                <span className="text-xs text-neutral-400 truncate flex-1">
-                  {logoFile ? logoFile.name : "Upload image PNG, JPG up to 5MB"}
+              <label htmlFor="location" className={labelClass}>
+                Location
+              </label>
+              <input
+                id="location"
+                name="location"
+                type="text"
+                autoComplete="address-level2"
+                defaultValue={hasCompany ? company.location || "" : ""}
+                placeholder="City, Country"
+                aria-invalid={Boolean(errors.location)}
+                aria-describedby={errors.location ? "location-error" : undefined}
+                className={`${fieldBase} h-12`}
+              />
+              <FieldError id="location-error" message={errors.location} />
+            </div>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <SelectField
+              id="employeeRange"
+              name="employeeRange"
+              label="Team size"
+              placeholder="Select a range"
+              options={EMPLOYEE_RANGES}
+              defaultValue={hasCompany ? company.employeeRange : ""}
+              error={errors.employeeRange}
+            />
+
+            <div>
+              <span className={labelClass}>Company logo</span>
+              <label className="flex h-12 cursor-pointer items-center gap-3 rounded-xl border border-dashed border-slate-300 px-4 transition-colors focus-within:ring-2 focus-within:ring-blue-500 hover:border-blue-600 dark:border-white/20 dark:hover:border-blue-400">
+                <Upload
+                  className="h-4 w-4 flex-shrink-0 text-slate-500 dark:text-slate-400"
+                  aria-hidden="true"
+                />
+                <span className="flex-1 truncate text-sm text-slate-600 dark:text-slate-400">
+                  {logoFile ? logoFile.name : "PNG or JPG, up to 5 MB"}
                 </span>
                 {logoPreview && (
-                  <Avatar
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
                     src={logoPreview}
-                    size="sm"
-                    className="w-6 h-6 rounded"
+                    alt="Logo preview"
+                    className="h-7 w-7 rounded object-cover"
                   />
                 )}
                 <input
                   type="file"
                   accept="image/png, image/jpeg"
-                  className="hidden"
-                  aria-label="Upload Company Logo"
+                  className="sr-only"
+                  aria-label="Upload company logo"
                   onChange={handleFileChange}
                 />
               </label>
+              <FieldError id="logo-error" message={errors.logo} />
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <span
-              id="lbl-desc"
-              className="text-xs font-medium text-neutral-300"
-            >
-              Brief Description
-            </span>
-            <Input
-              type="textarea"
+          <div>
+            <label htmlFor="description" className={labelClass}>
+              About the company
+            </label>
+            <textarea
+              id="description"
               name="description"
-              defaultValue={company?.description || ""}
-              placeholder="Tell us about your company's mission and culture..."
-              variant="secondary"
-              aria-labelledby="lbl-desc"
+              rows={5}
+              defaultValue={hasCompany ? company.description || "" : ""}
+              onChange={(e) => setDescriptionLength(e.target.value.length)}
+              placeholder="Tell candidates about your company’s mission and culture..."
+              aria-invalid={Boolean(errors.description)}
+              aria-describedby="description-hint"
+              className={`${fieldBase} resize-y py-3`}
             />
-            {errors.description && (
-              <span className="text-xs text-rose-400">
-                {errors.description}
+            <div className="mt-1.5 flex items-start justify-between gap-3">
+              <div id="description-hint">
+                {errors.description ? (
+                  <FieldError message={errors.description} />
+                ) : (
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
+                    At least 50 characters.
+                  </p>
+                )}
+              </div>
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                {descriptionLength}
               </span>
-            )}
+            </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-neutral-800">
-            {company && (
-              <Button
-                size="sm"
-                variant="ghost"
-                onPress={() => setIsEditing(false)}
-                className="text-neutral-400 hover:text-white"
-              >
-                Cancel
-              </Button>
-            )}
-            <Button
-              type="submit"
-              disabled={loading}
-              className="bg-white text-black font-semibold text-xs px-5 h-9 rounded-lg"
+          {formError && (
+            <div
+              role="alert"
+              className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
             >
-              {loading ? (
-                <Spinner size="sm" className="text-black" />
-              ) : company ? (
-                "Update Company"
-              ) : (
-                "Register Company"
-              )}
-            </Button>
+              {formError}
+            </div>
+          )}
+
+          <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 dark:border-white/10 sm:flex-row sm:justify-end">
+            {hasCompany && (
+              <button type="button" onClick={cancelEditing} className={outlineBtn}>
+                Cancel
+              </button>
+            )}
+            <button type="submit" disabled={loading} className={primaryBtn}>
+              {loading
+                ? "Saving…"
+                : hasCompany
+                  ? "Update company"
+                  : "Register company"}
+            </button>
           </div>
         </form>
       )}
 
-      {/* ── VIEW PROFILE STATE ─────────────────────────────────────────── */}
-      {company && !isEditing && (
-        <Card className="p-6 bg-[#0f0f11] border border-neutral-800 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 pb-4 border-b border-neutral-800">
-            <Avatar>
-              <Avatar.Image src={company?.logoUrl} alt="User avatar" />
-              <Avatar.Fallback>A</Avatar.Fallback>
-            </Avatar>
-            <div className="flex-1 space-y-1">
-              <h2 className="text-lg font-bold tracking-tight">
+      {/* Profile view */}
+      {hasCompany && !isEditing && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#0B1530] dark:shadow-none sm:p-7">
+          <div className="flex flex-col gap-4 border-b border-slate-200 pb-6 dark:border-white/10 sm:flex-row sm:items-center">
+            <CompanyLogo src={company.logoUrl} name={company.companyName} />
+
+            <div className="min-w-0 flex-1">
+              <h2
+                className={`${display.className} text-2xl font-extrabold tracking-tight text-slate-950 dark:text-white`}
+              >
                 {company.companyName}
               </h2>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-neutral-400">
-                <span className="flex items-center gap-1 capitalize">
-                  <Building2 className="w-3.5 h-3.5" />
-                  {INDUSTRIES.find((i) => i.id === company.industry)?.name ||
-                    company.industry}
-                </span>
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5" /> {company.location}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Users className="w-3.5 h-3.5" />
-                  {EMPLOYEE_RANGES.find((r) => r.id === company.employeeRange)
-                    ?.name || company.employeeRange}
-                </span>
-              </div>
+              <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-slate-600 dark:text-slate-400">
+                {industryName && (
+                  <li className="flex items-center gap-1.5">
+                    <Building2 className="h-4 w-4" aria-hidden="true" />
+                    {industryName}
+                  </li>
+                )}
+                {company.location && (
+                  <li className="flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4" aria-hidden="true" />
+                    {company.location}
+                  </li>
+                )}
+                {rangeName && (
+                  <li className="flex items-center gap-1.5">
+                    <Users className="h-4 w-4" aria-hidden="true" />
+                    {rangeName}
+                  </li>
+                )}
+              </ul>
             </div>
-            <Link
-              href={company?.websiteUrl ||"#"}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button
-                size="sm"
-                variant="secondary"
-                className="text-xs flex items-center gap-1 border border-neutral-800 bg-neutral-950 hover:bg-neutral-900"
+
+            {company.websiteUrl && (
+              <a
+                href={company.websiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={outlineBtn}
               >
-                Website <ExternalLink className="w-3 h-3" />
-              </Button>
-            </Link>
+                Website
+                <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                <span className="sr-only">(opens in a new tab)</span>
+              </a>
+            )}
           </div>
 
-          <div className="space-y-1">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
-              About Company
+          <div className="pt-6">
+            <h3
+              className={`${display.className} text-base font-bold text-slate-950 dark:text-white`}
+            >
+              About the company
             </h3>
-            <p className="text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap">
+            <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-300 sm:text-base">
               {company.description}
             </p>
           </div>
-        </Card>
+        </div>
       )}
     </div>
   );
