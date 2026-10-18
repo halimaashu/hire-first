@@ -8,7 +8,7 @@ export default function SmoothScroll({ children }) {
     <ReactLenis
       root
       options={{
-        lerp: 0.05,
+        lerp: 0.07,
         wheelMultiplier: 1,
         syncTouch: false,
       }}
