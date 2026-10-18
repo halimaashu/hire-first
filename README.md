@@ -2,7 +2,7 @@
 
 HireLoop is a full-stack job portal that connects job seekers and recruiters. Job seekers can browse and filter open roles, view job details and apply. Recruiters can post jobs and choose a plan. The interface is fully responsive and supports light and dark mode.
 
-**Live demo:** [your live link]
+**Live demo:** (https://hire-loop-beta.vercel.app/)
 **Author:** Ahik Rahman
 
 ---
