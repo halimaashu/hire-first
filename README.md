@@ -11,11 +11,11 @@ HireLoop is a full-stack job portal that connects job seekers and recruiters. Jo
 
 | Home (light) | Home (dark) |
 | --- | --- |
-| ![Home light](./screenshots/home-light.png) | ![Home dark](./screenshots/home-dark.png) |
+| ![Home light](./public/screenshots/home-light.png) | ![Home dark](./public/screenshots/home-dark.png) |
 
 | Jobs | Pricing |
 | --- | --- |
-| ![Jobs](./screenshots/jobs.png) | ![Pricing](./screenshots/pricing.png) |
+| ![Jobs](./public/screenshots/jobs.png) | ![Pricing](./public/screenshots/pricing.png) |
 
 > Add your own screenshots to a `screenshots` folder and update the file names above.
 
