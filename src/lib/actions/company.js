@@ -1,6 +1,6 @@
 'use server';
 
-import { mutationServer } from "./core/mutation";
+import { mutationServer, serverFetch } from "./core/mutation";
 
 
 
@@ -12,3 +12,8 @@ import { mutationServer } from "./core/mutation";
 export const registerCompany = async (newCompanyData) => {
  return mutationServer("/api/companies", newCompanyData);
 };
+
+// get all companies
+export const getALlCompanies=async(req,res)=>{
+    return await serverFetch("/api/companies")
+}

@@ -86,7 +86,7 @@ function getActiveHref(pathname, items) {
 
 function NavLinks({ items, activeHref, onNavigate }) {
   return (
-    <nav aria-label="Dashboard" className="flex flex-col gap-1">
+    <nav aria-label="Dashboard" className="flex flex-col gap-1 h-screen">
       {items.map((item) => {
         const active = item.href === activeHref;
         return (
