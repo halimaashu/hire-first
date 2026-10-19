@@ -409,9 +409,7 @@ export default function JobsManager({ jobs = [] }) {
                 <tr className="border-b border-slate-200 text-xs font-semibold text-slate-600 dark:border-white/10 dark:text-slate-400">
                   <th scope="col" className="px-6 py-4">Job</th>
                   <th scope="col" className="px-4 py-4">Category</th>
-                  <th scope="col" className="px-4 py-4">Type</th>
-                  <th scope="col" className="px-4 py-4">Location</th>
-                  <th scope="col" className="px-4 py-4">Salary</th>
+               
                   <th scope="col" className="px-4 py-4">Deadline</th>
                   <th scope="col" className="px-4 py-4">Status</th>
                   <th scope="col" className="px-6 py-4 text-right">Actions</th>
@@ -433,15 +431,7 @@ export default function JobsManager({ jobs = [] }) {
                     <td className="px-4 py-4 text-slate-700 dark:text-slate-300">
                       {CATEGORY_LABELS[job.jobCategory] ?? job.jobCategory ?? "—"}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-slate-700 dark:text-slate-300">
-                      {TYPE_LABELS[job.jobType] ?? job.jobType ?? "—"}
-                    </td>
-                    <td className="px-4 py-4 text-slate-700 dark:text-slate-300">
-                      {locationOf(job)}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-slate-700 dark:text-slate-300">
-                      {salaryOf(job)}
-                    </td>
+                   
                     <td className="whitespace-nowrap px-4 py-4 text-slate-700 dark:text-slate-300">
                       {formatDate(job.deadline)}
                     </td>

@@ -1,7 +1,24 @@
+import { getUser } from '@/lib/actions/core/session';
 import { CheckShapeFill } from '@gravity-ui/icons';
 import React from 'react';
+import toast from 'react-hot-toast';
 
-const page = () => {
+const page = async() => {
+   
+    // console.log(session_id,"sssssssssssssssssss")
+    const user=await getUser()
+    // console.log(user)
+    if(user){
+        const updatePlan=await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}user/${user.id}`)
+        if(updatePlan){
+           
+        }
+
+    }
+
+    
+
+
     return (
         <div className='sm:w-1/2 mx-auto  h-screen flex justify-center items-center flex-col shadow-2xl'>
            
